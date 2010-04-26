@@ -1,0 +1,2 @@
+#!/bin/sh
+exec mono bin/Debug/NPackage.exe http://localhost/~tim/np/nunit-2.5.5.10112/nunit.np

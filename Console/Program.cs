@@ -32,11 +32,16 @@ namespace NPackage.Console
             }
         }
 
-        private static void Main()
+        private static void Main(string[] args)
+        {
+            foreach (string arg in args)
+              Download(new Uri(arg));
+        }
+
+        private static void Download(Uri packageUri)
         {
             Package package = new Package();
 
-            Uri packageUri = new Uri("http://veneto/~tim/np/nunit-2.5.5.10112/nunit.np");
             {
                 WebRequest request = WebRequest.Create(packageUri);
                 using (WebResponse response = request.GetResponse())
