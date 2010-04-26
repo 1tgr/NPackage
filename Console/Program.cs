@@ -81,13 +81,24 @@ namespace NPackage.Console
             if (package.MasterSites == null)
                 package.MasterSites = packageUri.GetLeftPart(UriPartial.Path);
 
+            List<string> parts = new List<string>(Environment.CurrentDirectory.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
+            string path = null;
+            while (parts.Count > 0 && !Directory.Exists(path = Path.Combine(string.Join(Path.DirectorySeparatorChar.ToString(), parts.ToArray()), "lib")))
+                parts.RemoveAt(parts.Count - 1);
+
+            if (path == null || parts.Count == 0)
+                throw new InvalidOperationException("Couldn't find lib directory.");
+
             foreach (KeyValuePair<string, Library> pair in package.Library)
             {
                 Uri libraryUri = new Uri(new Uri(package.MasterSites), pair.Value.Binary);
+                string filename = Path.Combine(path, pair.Key);
+                System.Console.WriteLine("Installing {0} to {1}", libraryUri, filename);
+
                 WebRequest request = WebRequest.Create(libraryUri);
                 using (WebResponse response = request.GetResponse())
                 using (Stream inputStream = response.GetResponseStream())
-                using (Stream outputStream = File.Create(pair.Key))
+                using (Stream outputStream = File.Create(filename))
                 {
                     int count;
                     byte[] chunk = new byte[4096];
