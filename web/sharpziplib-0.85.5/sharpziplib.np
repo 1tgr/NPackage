@@ -1,0 +1,8 @@
+Name:	sharpziplib
+Version:	0.85.5
+Description:	Zip, GZip, Tar and BZip2 library written entirely in C# for the .NET platform.
+Author:	IC# Code
+Maintainer:	tim.g.robinson@gmail.com
+
+Library:	ICSharpCode.SharpZipLib.dll
+	Binary: net-20/ICSharpCode.SharpZipLib.dll
