@@ -54,17 +54,22 @@ namespace NPackage.Console
                 package.MasterSites = packageUri.GetLeftPart(UriPartial.Path);
 
             List<string> parts = new List<string>(Environment.CurrentDirectory.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar));
-            string path = null;
-            while (parts.Count > 0 && !Directory.Exists(path = Path.Combine(string.Join(Path.DirectorySeparatorChar.ToString(), parts.ToArray()), "lib")))
-                parts.RemoveAt(parts.Count - 1);
+            parts.Add("lib");
 
-            if (path == null || parts.Count == 0)
+            string path = null;
+            while (parts.Count >= 2 && !Directory.Exists(path = string.Join(Path.DirectorySeparatorChar.ToString(), parts.ToArray())))
+                parts.RemoveAt(parts.Count - 2);
+
+            if (path == null || parts.Count == 1)
                 throw new InvalidOperationException("Couldn't find lib directory.");
+
+            string packagePath = Path.Combine(path, Path.Combine(package.Name, package.Version));
+            Directory.CreateDirectory(packagePath);
 
             foreach (KeyValuePair<string, Library> pair in package.Library)
             {
                 Uri libraryUri = new Uri(new Uri(package.MasterSites), pair.Value.Binary);
-                string filename = Path.Combine(path, pair.Key);
+                string filename = Path.Combine(packagePath, pair.Key);
                 System.Console.WriteLine("Installing {0} to {1}", libraryUri, filename);
 
                 WebRequest request = WebRequest.Create(libraryUri);
