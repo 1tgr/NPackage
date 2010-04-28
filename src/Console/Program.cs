@@ -35,7 +35,16 @@ namespace NPackage.Console
         private static void Main(string[] args)
         {
             foreach (string arg in args)
-              Download(new Uri(arg));
+            {
+                try
+                {
+                    Download(new Uri(arg));
+                }
+                catch (Exception ex)
+                {
+                    System.Console.Error.WriteLine("Unable to download {0}. {1}", arg, ex.Message);
+                }
+            }
         }
 
         private static void Download(Uri packageUri)
