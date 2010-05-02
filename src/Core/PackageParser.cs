@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Reflection;
 
-namespace NPackage.Console
+namespace NPackage.Core
 {
     public static class PackageParser
     {
