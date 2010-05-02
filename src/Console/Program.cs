@@ -193,20 +193,16 @@ namespace NPackage.Console
             string tempPath = Path.Combine(Path.GetDirectoryName(archiveFilename), Path.GetRandomFileName());
             Directory.CreateDirectory(tempPath);
 
-            try
-            {
-                FastZip zip = new FastZip();
-                string fileFilter = uri.Fragment.TrimStart('#');
-                zip.ExtractZip(archiveFilename, tempPath, fileFilter);
-                string extractedFilename = Path.Combine(tempPath, Path.Combine(Path.GetFileNameWithoutExtension(archiveFilename), fileFilter));
-                File.Delete(filename);
-                File.Move(extractedFilename, filename);
-                ExtractFile(uri, filename);
-            }
-            finally
-            {
-                Directory.Delete(tempPath, true);
-            }
+            string fileFilter = uri.Fragment
+                .TrimStart('#')
+                .Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
+
+            new FastZip().ExtractZip(archiveFilename, tempPath, fileFilter);
+            string extractedFilename = Path.Combine(tempPath, Path.Combine(Path.GetFileNameWithoutExtension(archiveFilename), fileFilter));
+            File.Delete(filename);
+            File.Move(extractedFilename, filename);
+            ExtractFile(uri, filename);
+            Directory.Delete(tempPath, true);
         }
 
         private static void ParseYaml(TextReader reader, object obj)
