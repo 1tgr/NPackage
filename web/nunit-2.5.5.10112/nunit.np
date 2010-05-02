@@ -3,8 +3,7 @@ Version:	2.5.5.10112
 Description:	Test framework for all .Net languages, running on Microsoft .NET and Mono
 Author:	Charlie Poole
 Maintainer:	tim.g.robinson@gmail.com
-#Master-Sites:	http://launchpad.net/nunitv2/2.5/2.5.5/+download/
+Master-Sites:	http://launchpad.net/nunitv2/2.5/2.5.5/+download/
 
 Library:	nunit.framework.dll
-	#Binary: NUnit-2.5.5.10112.zip#bin/net-2.0/nunit.framework.dll
-	Binary: bin/net-2.0/nunit.framework.dll
+	Binary: NUnit-2.5.5.10112.zip#bin/net-2.0/nunit.framework.dll
