@@ -2,8 +2,10 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Reflection;
+using ICSharpCode.SharpZipLib.Zip;
 using NPackage.Core;
 
 namespace NPackage.Console
@@ -29,6 +31,35 @@ namespace NPackage.Console
             public object Value
             {
                 get { return value; }
+            }
+        }
+
+        private class DownloadAction
+        {
+            private readonly Uri uri;
+            private readonly string filename;
+            private readonly Action continuation;
+
+            public DownloadAction(Uri uri, string filename, Action continuation)
+            {
+                this.uri = uri;
+                this.filename = filename;
+                this.continuation = continuation;
+            }
+
+            public Uri Uri
+            {
+                get { return uri; }
+            }
+
+            public string Filename
+            {
+                get { return filename; }
+            }
+
+            public Action Continuation
+            {
+                get { return continuation; }
             }
         }
 
@@ -72,25 +103,109 @@ namespace NPackage.Console
             if (path == null || parts.Count == 1)
                 throw new InvalidOperationException("Couldn't find lib directory.");
 
+            string archivePath = Path.Combine(path, ".dist");
             string packagePath = Path.Combine(path, Path.Combine(package.Name, package.Version));
             Directory.CreateDirectory(packagePath);
 
+            List<DownloadAction> actions = new List<DownloadAction>();
             foreach (KeyValuePair<string, Library> pair in package.Library)
             {
-                Uri libraryUri = new Uri(new Uri(package.MasterSites), pair.Value.Binary);
+                Uri downloadUri = new Uri(new Uri(package.MasterSites), pair.Value.Binary);
                 string filename = Path.Combine(packagePath, pair.Key);
-                System.Console.WriteLine("Installing {0} to {1}", libraryUri, filename);
-
-                WebRequest request = WebRequest.Create(libraryUri);
-                using (WebResponse response = request.GetResponse())
-                using (Stream inputStream = response.GetResponseStream())
-                using (Stream outputStream = File.Create(filename))
+                if (string.IsNullOrEmpty(downloadUri.Fragment))
+                    actions.Add(new DownloadAction(downloadUri, filename, () => ExtractFile(downloadUri, filename)));
+                else
                 {
-                    int count;
-                    byte[] chunk = new byte[4096];
-                    while ((count = inputStream.Read(chunk, 0, chunk.Length)) > 0)
-                        outputStream.Write(chunk, 0, count);
+                    UriBuilder builder = new UriBuilder(downloadUri) { Fragment = string.Empty };
+                    Uri archiveUri = builder.Uri;
+                    string archiveFilename = Path.Combine(archivePath, Path.GetFileName(archiveUri.GetComponents(UriComponents.Path, UriFormat.Unescaped)));
+                    Directory.CreateDirectory(archivePath);
+                    actions.Add(new DownloadAction(builder.Uri, archiveFilename, () => UnpackArchive(archiveFilename, downloadUri, filename)));
                 }
+            }
+
+            while (actions.Count > 0)
+            {
+                var actionsByFilenameByUri = actions
+                    .GroupBy(a => a.Uri)
+                    .Select(g => new
+                                     {
+                                         Uri = g.Key,
+                                         ActionsByFilename = g
+                                     .GroupBy(a => a.Filename, StringComparer.InvariantCultureIgnoreCase)
+                                     .Select(g2 => new { Filename = g2.Key, Actions = g2.ToArray() })
+                                     .ToArray()
+                                     })
+                    .ToArray();
+
+                actions.Clear();
+
+                foreach (var uriPair in actionsByFilenameByUri)
+                {
+                    string firstFilename = null;
+
+                    foreach (var filenamePair in uriPair.ActionsByFilename)
+                    {
+                        if (firstFilename == null)
+                        {
+                            firstFilename = filenamePair.Filename;
+                            WebRequest request = WebRequest.Create(uriPair.Uri);
+                            using (WebResponse response = request.GetResponse())
+                            using (Stream inputStream = response.GetResponseStream())
+                            {
+                                System.Console.WriteLine("Downloading from {0} to {1}", uriPair.Uri, filenamePair.Filename);
+                                CopyStream(inputStream, firstFilename);
+                            }
+                        }
+                        else
+                        {
+                            System.Console.WriteLine("Copying from {0} to {1}", firstFilename, filenamePair.Filename);
+                            File.Copy(firstFilename, filenamePair.Filename, true);
+                        }
+
+                        foreach (DownloadAction action in filenamePair.Actions)
+                            action.Continuation();
+                    }
+                }
+            }
+        }
+
+        private static void ExtractFile(Uri uri, string filename)
+        {
+            System.Console.WriteLine("Installed {0} to {1}", uri, filename);
+        }
+
+        private static void CopyStream(Stream inputStream, string outputFilename)
+        {
+            using (Stream outputStream = File.Create(outputFilename))
+            {
+                int count;
+                byte[] chunk = new byte[4096];
+                while ((count = inputStream.Read(chunk, 0, chunk.Length)) > 0)
+                    outputStream.Write(chunk, 0, count);
+            }
+        }
+
+        private static void UnpackArchive(string archiveFilename, Uri uri, string filename)
+        {
+            System.Console.WriteLine("Unpacking {0} to {1}", archiveFilename, filename);
+
+            string tempPath = Path.Combine(Path.GetDirectoryName(archiveFilename), Path.GetRandomFileName());
+            Directory.CreateDirectory(tempPath);
+
+            try
+            {
+                FastZip zip = new FastZip();
+                string fileFilter = uri.Fragment.TrimStart('#');
+                zip.ExtractZip(archiveFilename, tempPath, fileFilter);
+                string extractedFilename = Path.Combine(tempPath, Path.Combine(Path.GetFileNameWithoutExtension(archiveFilename), fileFilter));
+                File.Delete(filename);
+                File.Move(extractedFilename, filename);
+                ExtractFile(uri, filename);
+            }
+            finally
+            {
+                Directory.Delete(tempPath, true);
             }
         }
 
