@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Reflection;
 using ICSharpCode.SharpZipLib.Zip;
 using NPackage.Core;
 
@@ -12,28 +10,6 @@ namespace NPackage.Console
 {
     internal static class Program
     {
-        private class NestedValue
-        {
-            private readonly int nesting;
-            private readonly object value;
-
-            public NestedValue(int nesting, object value)
-            {
-                this.nesting = nesting;
-                this.value = value;
-            }
-
-            public int Nesting
-            {
-                get { return nesting; }
-            }
-
-            public object Value
-            {
-                get { return value; }
-            }
-        }
-
         private class DownloadAction
         {
             private readonly Uri uri;
@@ -87,7 +63,7 @@ namespace NPackage.Console
                 using (WebResponse response = request.GetResponse())
                 using (Stream stream = response.GetResponseStream())
                 using (TextReader reader = new StreamReader(stream))
-                    ParseYaml(reader, package);
+                    PackageParser.ParseYaml(reader, package);
             }
 
             if (package.MasterSites == null)
@@ -153,13 +129,13 @@ namespace NPackage.Console
                             using (WebResponse response = request.GetResponse())
                             using (Stream inputStream = response.GetResponseStream())
                             {
-                                System.Console.WriteLine("Downloading from {0} to {1}", uriPair.Uri, filenamePair.Filename);
+                                System.Console.WriteLine("\tDownloading from {0} to {1}", uriPair.Uri, filenamePair.Filename);
                                 CopyStream(inputStream, firstFilename);
                             }
                         }
                         else
                         {
-                            System.Console.WriteLine("Copying from {0} to {1}", firstFilename, filenamePair.Filename);
+                            System.Console.WriteLine("\tCopying from {0} to {1}", firstFilename, filenamePair.Filename);
                             File.Copy(firstFilename, filenamePair.Filename, true);
                         }
 
@@ -188,66 +164,24 @@ namespace NPackage.Console
 
         private static void UnpackArchive(string archiveFilename, Uri uri, string filename)
         {
-            System.Console.WriteLine("Unpacking {0} to {1}", archiveFilename, filename);
+            System.Console.WriteLine("\tUnpacking {0} to {1}", archiveFilename, filename);
 
-            string tempPath = Path.Combine(Path.GetDirectoryName(archiveFilename), Path.GetRandomFileName());
-            Directory.CreateDirectory(tempPath);
-
-            string fileFilter = uri.Fragment
-                .TrimStart('#')
-                .Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar);
-
-            new FastZip().ExtractZip(archiveFilename, tempPath, fileFilter);
-            string extractedFilename = Path.Combine(tempPath, Path.Combine(Path.GetFileNameWithoutExtension(archiveFilename), fileFilter));
-            File.Delete(filename);
-            File.Move(extractedFilename, filename);
-            ExtractFile(uri, filename);
-            Directory.Delete(tempPath, true);
-        }
-
-        private static void ParseYaml(TextReader reader, object obj)
-        {
-            Stack<NestedValue> stack = new Stack<NestedValue>();
-            stack.Push(new NestedValue(0, obj));
-
-            string line;
-            while ((line = reader.ReadLine()) != null)
+            using (ZipFile file = new ZipFile(archiveFilename))
             {
-                int nesting = 0;
-                while (line.Length > nesting && char.IsWhiteSpace(line, nesting))
-                    nesting++;
+                string entryName = uri.Fragment.TrimStart('#');
 
-                string s = line.Trim();
-                if (s.Length == 0)
-                    continue;
-
-                string[] parts = s.Split(new[] { ':' }, 2);
-                if (parts.Length < 2)
-                    continue;
-
-                NestedValue value = stack.Peek();
-                while (nesting < value.Nesting)
-                    value = stack.Pop();
-
-                PropertyDescriptorCollection properties = TypeDescriptor.GetProperties(value.Value);
-                string name = parts[0].Replace("-", string.Empty);
-                PropertyDescriptor property = properties[name];
-                if (property == null)
-                    continue;
-
-                Type propertyType = property.PropertyType;
-                if (propertyType.IsGenericType && propertyType.GetGenericTypeDefinition() == typeof(IDictionary<,>))
+                int index = file.FindEntry(entryName, true);
+                if (index < 0)
                 {
-                    Type[] genericArguments = propertyType.GetGenericArguments();
-                    MethodInfo addMethod = propertyType.GetMethod("Add", genericArguments);
-                    object dictionary = property.GetValue(value.Value);
-                    object innerValue = Activator.CreateInstance(genericArguments[1]);
-                    addMethod.Invoke(dictionary, new[] { parts[1].TrimStart(), innerValue });
-                    stack.Push(new NestedValue(nesting + 1, innerValue));
+                    string message = string.Format("There is no {0} in {1}.", entryName, archiveFilename);
+                    throw new InvalidOperationException(message);
                 }
-                else
-                    property.SetValue(value.Value, parts[1].TrimStart());
+
+                using (Stream stream = file.GetInputStream(index))
+                    CopyStream(stream, filename);
             }
+
+            ExtractFile(uri, filename);
         }
     }
 }
