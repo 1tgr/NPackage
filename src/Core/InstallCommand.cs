@@ -82,24 +82,30 @@ namespace NPackage.Core
 
         private static void UnpackArchive(string archiveFilename, Uri uri, string filename)
         {
-            Console.WriteLine("\tUnpacking {0} to {1}", archiveFilename, filename);
+            FileInfo archiveFileInfo = new FileInfo(archiveFilename);
+            FileInfo fileInfo = new FileInfo(filename);
 
-            using (ZipFile file = new ZipFile(archiveFilename))
+            if (!fileInfo.Exists || archiveFileInfo.LastWriteTime > fileInfo.LastWriteTime)
             {
-                string entryName = uri.Fragment.TrimStart('#');
+                Console.WriteLine("\tUnpacking {0} to {1}", archiveFilename, filename);
 
-                int index = file.FindEntry(entryName, true);
-                if (index < 0)
+                using (ZipFile file = new ZipFile(archiveFilename))
                 {
-                    string message = String.Format("There is no {0} in {1}.", entryName, archiveFilename);
-                    throw new InvalidOperationException(message);
+                    string entryName = uri.Fragment.TrimStart('#');
+
+                    int index = file.FindEntry(entryName, true);
+                    if (index < 0)
+                    {
+                        string message = String.Format("There is no {0} in {1}.", entryName, archiveFilename);
+                        throw new InvalidOperationException(message);
+                    }
+
+                    using (Stream stream = file.GetInputStream(index))
+                        stream.CopyTo(filename);
                 }
 
-                using (Stream stream = file.GetInputStream(index))
-                    stream.CopyTo(filename);
+                ExtractFile(uri, filename);
             }
-
-            ExtractFile(uri, filename);
         }
 
         public int Run(string[] args)

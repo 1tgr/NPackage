@@ -66,24 +66,45 @@ namespace NPackage.Core
                 foreach (var uriPair in actionsByFilenameByUri)
                 {
                     string firstFilename = null;
+                    FileInfo firstFileInfo = null;
 
                     foreach (var filenamePair in uriPair.ActionsByFilename)
                     {
+                        FileInfo fileInfo = new FileInfo(filenamePair.Filename);
+
                         if (firstFilename == null)
                         {
-                            firstFilename = filenamePair.Filename;
+                            RaiseLog("Checking {0}", uriPair.Uri);
+
                             WebRequest request = WebRequest.Create(uriPair.Uri);
                             using (WebResponse response = request.GetResponse())
-                            using (Stream inputStream = response.GetResponseStream())
                             {
-                                RaiseLog("Downloading from {0} to {1}", uriPair.Uri, filenamePair.Filename);
-                                inputStream.CopyTo(firstFilename);
+                                HttpWebResponse httpWebResponse = response as HttpWebResponse;
+                                if (!fileInfo.Exists || (httpWebResponse != null && httpWebResponse.LastModified > fileInfo.LastWriteTime))
+                                {
+                                    using (Stream inputStream = response.GetResponseStream())
+                                    {
+                                        RaiseLog("Downloading from {0} to {1}", uriPair.Uri, filenamePair.Filename);
+                                        inputStream.CopyTo(filenamePair.Filename);
+                                        fileInfo.Refresh();
+
+                                        if (httpWebResponse != null)
+                                            fileInfo.LastWriteTime = httpWebResponse.LastModified;
+                                    }
+                                }
                             }
+
+                            firstFilename = filenamePair.Filename;
+                            firstFileInfo = fileInfo;
                         }
                         else
                         {
-                            RaiseLog("Copying from {0} to {1}", firstFilename, filenamePair.Filename);
-                            File.Copy(firstFilename, filenamePair.Filename, true);
+                            if (!fileInfo.Exists || firstFileInfo.LastWriteTime > fileInfo.LastWriteTime)
+                            {
+                                RaiseLog("Copying from {0} to {1}", firstFilename, filenamePair.Filename);
+                                File.Copy(firstFilename, filenamePair.Filename, true);
+                                fileInfo.LastWriteTime = firstFileInfo.LastWriteTime;
+                            }
                         }
 
                         foreach (DownloadAction action in filenamePair.Actions)
