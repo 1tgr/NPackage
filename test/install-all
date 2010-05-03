@@ -1,7 +1,12 @@
 #!/bin/sh
-exec mono ../bin/Debug/NPackage.exe \
+testDir=`dirname $0`
+binDir=$testDir/../bin/Debug
+libDir=$testDir/lib
+rm -r $libDir/.dist $libDir/*
+exec mono $binDir/NPackage.exe \
   http://np.partario.com/cecil-0.6/cecil.np \
+  http://np.partario.com/log4net-1.2.10/log4net.np \
   http://np.partario.com/nhibernate-2.1.2/nhibernate.np \
-  http://np.partario.com/rhino.mocks-3.6/rhino.mocks.np
+  http://np.partario.com/rhino.mocks-3.6/rhino.mocks.np \
   http://np.partario.com/nunit-2.5.5.10112/nunit.np \
   http://np.partario.com/sharpziplib-0.85.5/sharpziplib.np

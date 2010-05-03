@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using ICSharpCode.SharpZipLib.GZip;
+using ICSharpCode.SharpZipLib.Tar;
 using ICSharpCode.SharpZipLib.Zip;
 using NPackage.Core.Extensions;
 
@@ -11,6 +13,7 @@ namespace NPackage.Core
         private readonly DownloadWorkflow workflow = new DownloadWorkflow();
         private readonly string libPath = FindLibDirectory();
         private readonly string archivePath;
+        private bool logNeedsIndent;
 
         public InstallCommand()
         {
@@ -18,9 +21,20 @@ namespace NPackage.Core
             workflow.Log += OnWorkflowLog;
         }
 
-        private static void OnWorkflowLog(object sender, LogEventArgs e)
+        private void Log(string format, params object[] args)
         {
-            Console.WriteLine("\t" + e.Message);
+            string message = string.Format(format, args);
+
+            Console.WriteLine(logNeedsIndent
+                ? "        " + message
+                : message);
+
+            logNeedsIndent = true;
+        }
+
+        private void OnWorkflowLog(object sender, LogEventArgs e)
+        {
+            Log(e.Message);
         }
 
         public static string FindLibDirectory()
@@ -41,8 +55,7 @@ namespace NPackage.Core
 
         private void DownloadPackageFile(Uri packageUri)
         {
-            string packageFilename = Path.Combine(archivePath, Path.GetFileName(packageUri.GetComponents(UriComponents.Path, UriFormat.Unescaped)));
-            workflow.Enqueue(packageUri, packageFilename, () => DownloadPackageContents(packageUri, packageFilename));
+            workflow.Enqueue(packageUri, archivePath + "/", packageFilename => DownloadPackageContents(packageUri, packageFilename));
         }
 
         private void DownloadPackageContents(Uri packageUri, string packageFilename)
@@ -64,48 +77,82 @@ namespace NPackage.Core
                 Uri downloadUri = new Uri(siteUri, pair.Value.Binary);
                 string filename = Path.Combine(packagePath, pair.Key);
                 if (string.IsNullOrEmpty(downloadUri.Fragment))
-                    workflow.Enqueue(downloadUri, filename, () => ExtractFile(downloadUri, filename));
+                    workflow.Enqueue(downloadUri, filename, delegate { LogSuccess(downloadUri, filename); });
                 else
                 {
                     UriBuilder archiveUriBuilder = new UriBuilder(downloadUri) { Fragment = String.Empty };
                     Uri archiveUri = archiveUriBuilder.Uri;
-                    string archiveFilename = Path.Combine(archivePath, Path.GetFileName(archiveUri.GetComponents(UriComponents.Path, UriFormat.Unescaped)));
-                    workflow.Enqueue(archiveUri, archiveFilename, () => UnpackArchive(archiveFilename, downloadUri, filename));
+                    workflow.Enqueue(archiveUri, archivePath + "/", archiveFilename => UnpackArchive(archiveFilename, downloadUri, filename));
                 }
             }
         }
 
-        private static void ExtractFile(Uri uri, string filename)
+        private static void LogSuccess(Uri uri, string filename)
         {
-            Console.WriteLine("Installed {0} to {1}", uri, filename);
+            Console.WriteLine("\r ***    Installed {0} to {1}", uri, filename);
         }
 
-        private static void UnpackArchive(string archiveFilename, Uri uri, string filename)
+        private void UnpackArchive(string archiveFilename, Uri uri, string filename)
         {
             FileInfo archiveFileInfo = new FileInfo(archiveFilename);
             FileInfo fileInfo = new FileInfo(filename);
 
             if (!fileInfo.Exists || archiveFileInfo.LastWriteTime > fileInfo.LastWriteTime)
             {
-                Console.WriteLine("\tUnpacking {0} to {1}", archiveFilename, filename);
+                Log("Unpacking {0} to {1}", archiveFilename, filename);
 
+                string entryName = uri.Fragment.TrimStart('#');
+                ExtractFile(archiveFilename, entryName, filename);
+
+                LogSuccess(uri, filename);
+            }
+        }
+
+        private static InvalidOperationException NotFoundInArchive(string archiveFilename, string entryName)
+        {
+            string message = String.Format("There is no {0} in {1}.", entryName, archiveFilename);
+            throw new InvalidOperationException(message);
+        }
+
+        private void ExtractFile(string archiveFilename, string entryName, string filename)
+        {
+            if (archiveFilename.EndsWith(".zip", StringComparison.InvariantCultureIgnoreCase))
+            {
                 using (ZipFile file = new ZipFile(archiveFilename))
                 {
-                    string entryName = uri.Fragment.TrimStart('#');
-
                     int index = file.FindEntry(entryName, true);
                     if (index < 0)
-                    {
-                        string message = String.Format("There is no {0} in {1}.", entryName, archiveFilename);
-                        throw new InvalidOperationException(message);
-                    }
+                        throw NotFoundInArchive(archiveFilename, entryName);
 
                     using (Stream stream = file.GetInputStream(index))
                         stream.CopyTo(filename);
                 }
-
-                ExtractFile(uri, filename);
             }
+            else if (archiveFilename.EndsWith(".tar.gz", StringComparison.InvariantCultureIgnoreCase) ||
+                     archiveFilename.EndsWith(".tgz", StringComparison.InvariantCultureIgnoreCase))
+            {
+                using (Stream fileStream = File.Open(archiveFilename, FileMode.Open, FileAccess.Read))
+                using (Stream gzipStream = new GZipInputStream(fileStream))
+                using (TarInputStream tarStream = new TarInputStream(gzipStream))
+                {
+                    TarEntry entry;
+                    while ((entry = tarStream.GetNextEntry()) != null)
+                    {
+                        if (string.Equals(entry.Name, entryName, StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            using (FileStream outputStream = File.Create(filename))
+                                tarStream.CopyEntryContents(outputStream);
+
+                            break;
+                        }
+                    }
+
+                    if (entry == null)
+                        throw NotFoundInArchive(archiveFilename, entryName);
+                }
+            }
+            else
+                throw new NotSupportedException(archiveFilename + " is not a recognised archive.");
         }
 
         public int Run(string[] args)
@@ -115,7 +162,14 @@ namespace NPackage.Core
             foreach (string arg in args)
                 DownloadPackageFile(new Uri(arg));
 
-            workflow.Run();
+            int steps = 1;
+            do
+            {
+                Console.Write("[ {0,3} ] ", steps);
+                logNeedsIndent = false;
+                steps++;
+            } while (workflow.Step());
+
             return 0;
         }
     }

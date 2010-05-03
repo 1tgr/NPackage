@@ -13,7 +13,7 @@ namespace NPackage.Console
             }
             catch (Exception ex)
             {
-                System.Console.Error.WriteLine(ex.Message);
+                System.Console.Error.WriteLine(ex);
                 return 1;
             }
         }

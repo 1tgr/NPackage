@@ -13,9 +13,9 @@ namespace NPackage.Core
         {
             private readonly Uri uri;
             private readonly string filename;
-            private readonly Action continuation;
+            private readonly Action<string> continuation;
 
-            public DownloadAction(Uri uri, string filename, Action continuation)
+            public DownloadAction(Uri uri, string filename, Action<string> continuation)
             {
                 this.uri = uri;
                 this.filename = filename;
@@ -32,7 +32,7 @@ namespace NPackage.Core
                 get { return filename; }
             }
 
-            public Action Continuation
+            public Action<string> Continuation
             {
                 get { return continuation; }
             }
@@ -40,78 +40,113 @@ namespace NPackage.Core
 
         private readonly List<DownloadAction> actions = new List<DownloadAction>();
 
-        public void Enqueue(Uri uri, string filename, Action continuation)
+        public void Enqueue(Uri uri, string filename, Action<string> continuation)
         {
             actions.Add(new DownloadAction(uri, filename, continuation));
         }
 
-        public void Run()
+        private static string AddFilename(string pathOrFilename, string filename)
         {
-            while (actions.Count > 0)
+            bool isPath = pathOrFilename.EndsWith(Path.DirectorySeparatorChar.ToString())
+                || pathOrFilename.EndsWith(Path.AltDirectorySeparatorChar.ToString());
+
+            return isPath
+                ? Path.Combine(pathOrFilename, filename)
+                : pathOrFilename;
+        }
+
+        public bool Step()
+        {
+            var actionsByFilenameByUri = actions
+                .GroupBy(a => a.Uri)
+                .Select(g => new
+                                 {
+                                     Uri = g.Key,
+                                     ActionsByFilename = g
+                                 .GroupBy(a => a.Filename, StringComparer.InvariantCultureIgnoreCase)
+                                 .Select(g2 => new { Filename = g2.Key, Actions = g2.ToArray() })
+                                 .OrderBy(a => a.Filename, StringComparer.InvariantCultureIgnoreCase)
+                                 .ToArray()
+                                 })
+                .OrderBy(a => a.Uri.ToString())
+                .ToArray();
+
+            actions.Clear();
+
+            foreach (var uriPair in actionsByFilenameByUri)
             {
-                var actionsByFilenameByUri = actions
-                    .GroupBy(a => a.Uri)
-                    .Select(g => new
-                                     {
-                                         Uri = g.Key,
-                                         ActionsByFilename = g
-                                     .GroupBy(a => a.Filename, StringComparer.InvariantCultureIgnoreCase)
-                                     .Select(g2 => new { Filename = g2.Key, Actions = g2.ToArray() })
-                                     .ToArray()
-                                     })
-                    .ToArray();
+                string firstFilename = null;
+                FileInfo firstFileInfo = null;
+                string responseUriFilename = null;
 
-                actions.Clear();
-
-                foreach (var uriPair in actionsByFilenameByUri)
+                foreach (var filenamePair in uriPair.ActionsByFilename)
                 {
-                    string firstFilename = null;
-                    FileInfo firstFileInfo = null;
-
-                    foreach (var filenamePair in uriPair.ActionsByFilename)
+                    if (firstFilename == null)
                     {
-                        FileInfo fileInfo = new FileInfo(filenamePair.Filename);
+                        string responseFilename;
+                        RaiseLog("Checking {0}", uriPair.Uri);
 
-                        if (firstFilename == null)
+                        WebRequest request = WebRequest.Create(uriPair.Uri);
+                        using (WebResponse response = request.GetResponse())
                         {
-                            RaiseLog("Checking {0}", uriPair.Uri);
-
-                            WebRequest request = WebRequest.Create(uriPair.Uri);
-                            using (WebResponse response = request.GetResponse())
+                            responseUriFilename = Path.GetFileName(response.ResponseUri.GetComponents(UriComponents.Path, UriFormat.Unescaped));
+                          
+                            string contentDisposition = response.Headers["Content-Disposition"];
+                            if (!string.IsNullOrEmpty(contentDisposition))
                             {
-                                HttpWebResponse httpWebResponse = response as HttpWebResponse;
-                                if (!fileInfo.Exists || (httpWebResponse != null && httpWebResponse.LastModified > fileInfo.LastWriteTime))
+                                string[] parts = contentDisposition.Split(new[] { ';' }, 2);
+                                if (parts.Length > 1)
                                 {
-                                    using (Stream inputStream = response.GetResponseStream())
-                                    {
-                                        RaiseLog("Downloading from {0} to {1}", uriPair.Uri, filenamePair.Filename);
-                                        inputStream.CopyTo(filenamePair.Filename);
-                                        fileInfo.Refresh();
-
-                                        if (httpWebResponse != null)
-                                            fileInfo.LastWriteTime = httpWebResponse.LastModified;
-                                    }
+                                    string part1 = parts[1].TrimStart();
+                                    const string prefix = "filename=";
+                                    if (part1.StartsWith(prefix))
+                                        responseUriFilename = part1.Substring(prefix.Length).Trim();
                                 }
                             }
 
-                            firstFilename = filenamePair.Filename;
+                            responseFilename = AddFilename(filenamePair.Filename, responseUriFilename);
+                            FileInfo fileInfo = new FileInfo(responseFilename);
+
+                            HttpWebResponse httpWebResponse = response as HttpWebResponse;
+                            if (!fileInfo.Exists || (httpWebResponse != null && httpWebResponse.LastModified > fileInfo.LastWriteTime))
+                            {
+                                using (Stream inputStream = response.GetResponseStream())
+                                {
+                                    RaiseLog("Downloading from {0} to {1}", response.ResponseUri, responseFilename);
+                                    inputStream.CopyTo(responseFilename);
+                                    fileInfo.Refresh();
+
+                                    if (httpWebResponse != null)
+                                        fileInfo.LastWriteTime = httpWebResponse.LastModified;
+                                }
+                            }
+                            
+                            firstFilename = responseFilename;
                             firstFileInfo = fileInfo;
                         }
-                        else
+                        
+                        foreach (DownloadAction action in filenamePair.Actions)
+                            action.Continuation(responseFilename);
+                    }
+                    else
+                    {
+                        string responseFilename = AddFilename(filenamePair.Filename, responseUriFilename);
+                        FileInfo fileInfo = new FileInfo(responseFilename);
+
+                        if (!fileInfo.Exists || firstFileInfo.LastWriteTime > fileInfo.LastWriteTime)
                         {
-                            if (!fileInfo.Exists || firstFileInfo.LastWriteTime > fileInfo.LastWriteTime)
-                            {
-                                RaiseLog("Copying from {0} to {1}", firstFilename, filenamePair.Filename);
-                                File.Copy(firstFilename, filenamePair.Filename, true);
-                                fileInfo.LastWriteTime = firstFileInfo.LastWriteTime;
-                            }
+                            RaiseLog("Copying from {0} to {1}", firstFilename, responseFilename);
+                            File.Copy(firstFilename, responseFilename, true);
+                            fileInfo.LastWriteTime = firstFileInfo.LastWriteTime;
                         }
 
                         foreach (DownloadAction action in filenamePair.Actions)
-                            action.Continuation();
+                            action.Continuation(responseFilename);
                     }
                 }
             }
+            
+            return actions.Count > 0;
         }
 
         private void RaiseLog(string format, params object[] args)
