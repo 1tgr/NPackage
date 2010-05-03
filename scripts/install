@@ -1,2 +1,6 @@
 #!/bin/sh
-exec mono ../bin/Debug/NPackage.exe http://np.partario.com/nunit-2.5.5.10112/nunit.np http://np.partario.com/sharpziplib-0.85.5/sharpziplib.np
+exec mono ../bin/Debug/NPackage.exe \
+  http://np.partario.com/nhibernate-2.1.2/nhibernate.np \
+  http://np.partario.com/rhino.mocks-3.6/rhino.mocks.np
+  http://np.partario.com/nunit-2.5.5.10112/nunit.np \
+  http://np.partario.com/sharpziplib-0.85.5/sharpziplib.np

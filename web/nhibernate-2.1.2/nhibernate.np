@@ -1,0 +1,12 @@
+Name:	nhibernate
+Version:	2.1.2
+Description:	.NET port of the excellent Java Hibernate which provides Object/Relational mapping to persist objects in a relational database
+Author:	Ayende Rahien
+Maintainer:	tim.g.robinson@gmail.com
+Master-Sites:	http://downloads.sourceforge.net/project/nhibernate/NHibernate/2.1.2GA/
+
+Library:	NHibernate.dll
+	Binary: NHibernate-2.1.2.GA-bin.zip#Required_Bins/NHibernate.dll
+
+Library:	NHibernate.xml
+	Binary: NHibernate-2.1.2.GA-bin.zip#Required_Bins/NHibernate.xml
