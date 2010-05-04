@@ -1,10 +1,30 @@
-Name:	nunit
-Version:	2.5.5.10112
-Description:	Test framework for all .Net languages, running on Microsoft .NET and Mono
-Author:	Charlie Poole
-Maintainer:	tim.g.robinson@gmail.com
-Master-Sites:	http://download.codeplex.com/Project/Download/
+Name:   quickgraph
+Version:        3.3.40824.00
+Description:    Generic Graph Data Structures and Algorithms for .Net
+Author: Jonathan de Halleux
+Maintainer:     tim.g.robinson@gmail.com
+Master-Sites:   http://download.codeplex.com/Project/Download/
 
-Library:	QuickGraph.dll
-	Binary: FileDownload.aspx?ProjectName=quickgraph&DownloadId=50945&FileTime=128956893024170000&Build=16504#QuickGraph.dll
+Library:        QuickGraph.dll
+        Binary: FileDownload.aspx?ProjectName=quickgraph&DownloadId=50945&FileTime=128956893024170000&Build=16504#QuickGraph.dll
 
+Library:        QuickGraph.xml
+        Binary: FileDownload.aspx?ProjectName=quickgraph&DownloadId=50945&FileTime=128956893024170000&Build=16504#QuickGraph.xml
+
+Library:        QuickGraph.Data.dll
+        Binary: FileDownload.aspx?ProjectName=quickgraph&DownloadId=50945&FileTime=128956893024170000&Build=16504#QuickGraph.Data.dll
+
+Library:        QuickGraph.Data.xml
+        Binary: FileDownload.aspx?ProjectName=quickgraph&DownloadId=50945&FileTime=128956893024170000&Build=16504#QuickGraph.Data.xml
+
+Library:        QuickGraph.Glee.dll
+        Binary: FileDownload.aspx?ProjectName=quickgraph&DownloadId=50945&FileTime=128956893024170000&Build=16504#QuickGraph.Glee.dll
+
+Library:        QuickGraph.Glee.xml
+        Binary: FileDownload.aspx?ProjectName=quickgraph&DownloadId=50945&FileTime=128956893024170000&Build=16504#QuickGraph.Glee.xml
+
+Library:        QuickGraph.Graphviz.dll
+        Binary: FileDownload.aspx?ProjectName=quickgraph&DownloadId=50945&FileTime=128956893024170000&Build=16504#QuickGraph.Graphviz.dll
+
+Library:        QuickGraph.Graphviz.xml
+        Binary: FileDownload.aspx?ProjectName=quickgraph&DownloadId=50945&FileTime=128956893024170000&Build=16504#QuickGraph.Graphviz.xml
