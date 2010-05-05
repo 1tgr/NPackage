@@ -1,0 +1,15 @@
+Name:	json
+Version:	7
+Description:	Makes working with JSON formatted data in .NET simple
+Author:	James Newton-King
+Maintainer:	tim.g.robinson@gmail.com
+Master-Sites:	http://download.codeplex.com/Project/Download/
+
+Library:	Newtonsoft.Json.dll
+	Binary: FileDownload.aspx?ProjectName=Json&DownloadId=117351&FileTime=129162242226600000&Build=16504#Bin/DotNet/Newtonsoft.Json.dll
+
+Library:	Newtonsoft.Json.pdb
+	Binary: FileDownload.aspx?ProjectName=Json&DownloadId=117351&FileTime=129162242226600000&Build=16504#Bin/DotNet/Newtonsoft.Json.pdb
+
+Library:	Newtonsoft.Json.xml
+	Binary: FileDownload.aspx?ProjectName=Json&DownloadId=117351&FileTime=129162242226600000&Build=16504#Bin/DotNet/Newtonsoft.Json.xml
