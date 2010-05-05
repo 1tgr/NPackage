@@ -100,7 +100,7 @@ namespace NPackage.Core
                                     string part1 = parts[1].TrimStart();
                                     const string prefix = "filename=";
                                     if (part1.StartsWith(prefix))
-                                        responseUriFilename = part1.Substring(prefix.Length).Trim();
+                                        responseUriFilename = part1.Substring(prefix.Length).Trim('"').Trim();
                                 }
                             }
 
