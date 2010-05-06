@@ -52,7 +52,10 @@ namespace NPackage.Core
 
                 NestedValue value = stack.Peek();
                 while (nesting < value.Nesting)
-                    value = stack.Pop();
+                {
+                    stack.Pop();
+                    value = stack.Peek();
+                }
 
                 PropertyDescriptorCollection properties = TypeDescriptor.GetProperties(value.Value);
                 string name = parts[0].Replace("-", String.Empty);
