@@ -55,7 +55,7 @@ namespace NPackage.Core
 
         private void DownloadPackageFile(Uri packageUri)
         {
-            workflow.Enqueue(packageUri, archivePath + "/", packageFilename => DownloadPackageContents(packageUri, packageFilename));
+            workflow.Enqueue(packageUri, archivePath + Path.DirectorySeparatorChar, packageFilename => DownloadPackageContents(packageUri, packageFilename));
         }
 
         private void DownloadPackageContents(Uri packageUri, string packageFilename)
@@ -82,7 +82,7 @@ namespace NPackage.Core
                 {
                     UriBuilder archiveUriBuilder = new UriBuilder(downloadUri) { Fragment = String.Empty };
                     Uri archiveUri = archiveUriBuilder.Uri;
-                    workflow.Enqueue(archiveUri, archivePath + "/", archiveFilename => UnpackArchive(archiveFilename, downloadUri, filename));
+                    workflow.Enqueue(archiveUri, archivePath + Path.DirectorySeparatorChar, archiveFilename => UnpackArchive(archiveFilename, downloadUri, filename));
                 }
             }
         }
