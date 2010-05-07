@@ -1,0 +1,34 @@
+{
+  "Name": "quickgraph",
+  "Version": "3.3.40824.00",
+  "Description": "Generic Graph Data Structures and Algorithms for .Net",
+  "Author": "Jonathan de Halleux",
+  "Maintainer": "tim.g.robinson@gmail.com",
+  "MasterSites": "http://download.codeplex.com/Project/Download/",
+  "Library": {
+    "QuickGraph.dll": {
+      "Binary": "FileDownload.aspx?ProjectName=quickgraph&DownloadId=50945&FileTime=128956893024170000&Build=16504#QuickGraph.dll"
+    },
+    "QuickGraph.xml": {
+      "Binary": "FileDownload.aspx?ProjectName=quickgraph&DownloadId=50945&FileTime=128956893024170000&Build=16504#QuickGraph.xml"
+    },
+    "QuickGraph.Data.dll": {
+      "Binary": "FileDownload.aspx?ProjectName=quickgraph&DownloadId=50945&FileTime=128956893024170000&Build=16504#QuickGraph.Data.dll"
+    },
+    "QuickGraph.Data.xml": {
+      "Binary": "FileDownload.aspx?ProjectName=quickgraph&DownloadId=50945&FileTime=128956893024170000&Build=16504#QuickGraph.Data.xml"
+    },
+    "QuickGraph.Glee.dll": {
+      "Binary": "FileDownload.aspx?ProjectName=quickgraph&DownloadId=50945&FileTime=128956893024170000&Build=16504#QuickGraph.Glee.dll"
+    },
+    "QuickGraph.Glee.xml": {
+      "Binary": "FileDownload.aspx?ProjectName=quickgraph&DownloadId=50945&FileTime=128956893024170000&Build=16504#QuickGraph.Glee.xml"
+    },
+    "QuickGraph.Graphviz.dll": {
+      "Binary": "FileDownload.aspx?ProjectName=quickgraph&DownloadId=50945&FileTime=128956893024170000&Build=16504#QuickGraph.Graphviz.dll"
+    },
+    "QuickGraph.Graphviz.xml": {
+      "Binary": "FileDownload.aspx?ProjectName=quickgraph&DownloadId=50945&FileTime=128956893024170000&Build=16504#QuickGraph.Graphviz.xml"
+    }
+  }
+}
