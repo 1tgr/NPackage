@@ -4,8 +4,8 @@
   "Description": "Zip, GZip, Tar and BZip2 library written entirely in C# for the .NET platform.",
   "Author": "IC# Code",
   "Maintainer": "tim.g.robinson@gmail.com",
-  "MasterSites": "http://downloads.sourceforge.net/project/sharpdevelop/SharpZipLib/0.85.5/",
-  "Library": {
+  "MasterSites": [ "http://downloads.sourceforge.net/project/sharpdevelop/SharpZipLib/0.85.5/" ],
+  "Libraries": {
     "ICSharpCode.SharpZipLib.dll": {
       "Binary": "SharpZipLib_0855_Bin.zip#net-20/ICSharpCode.SharpZipLib.dll"
     }

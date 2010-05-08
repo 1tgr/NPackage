@@ -4,8 +4,8 @@
   "Description": "Tool to help the programmer output log statements to a variety of output targets",
   "Author": "Apache",
   "Maintainer": "tim.g.robinson@gmail.com",
-  "MasterSites": "http://archive.apache.org/dist/incubator/log4net/1.2.10/",
-  "Library": {
+  "MasterSites": [ "http://archive.apache.org/dist/incubator/log4net/1.2.10/" ],
+  "Libraries": {
     "log4net.dll": {
       "Binary": "incubating-log4net-1.2.10.zip#log4net-1.2.10/bin/net/2.0/release/log4net.dll"
     },

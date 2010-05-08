@@ -1,7 +1,4 @@
 #!/bin/sh
 scriptsDir=`dirname $0`
 binDir=$scriptsDir/../Bin/Debug
-exec mono $binDir/NPackage.exe \
-  http://np.partario.com/json-7/json.np \
-  http://np.partario.com/nunit-2.5.5.10112/nunit.np \
-  http://np.partario.com/sharpziplib-0.85.5/sharpziplib.np
+exec mono $binDir/NPackage.exe json nunit sharpziplib

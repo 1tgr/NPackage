@@ -4,8 +4,8 @@
   "Description": "Dynamic mock object framework for the .Net platform",
   "Author": "Ayende Rahien",
   "Maintainer": "tim.g.robinson@gmail.com",
-  "MasterSites": "http://www.ayende.com/20/section.aspx/download/",
-  "Library": {
+  "MasterSites": [ "http://www.ayende.com/20/section.aspx/download/" ],
+  "Libraries": {
     "Rhino.Mocks.dll": {
       "Binary": "234#Rhino.Mocks.dll"
     },

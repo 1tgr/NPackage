@@ -21,8 +21,8 @@
   "Description": "Makes working with JSON formatted data in .NET simple",
   "Author": "James Newton-King",
   "Maintainer": "tim.g.robinson@gmail.com",
-  "MasterSites": "http://download.codeplex.com/Project/Download/",
-  "Library": {
+  "MasterSites": [ "http://download.codeplex.com/Project/Download/" ],
+  "Libraries": {
     "Newtonsoft.Json.dll": {
       "Binary": "FileDownload.aspx?ProjectName=Json&DownloadId=117351&FileTime=129162242226600000&Build=16504#Bin/DotNet/Newtonsoft.Json.dll"
     },
@@ -40,8 +40,8 @@
   "Description": "Tool to help the programmer output log statements to a variety of output targets",
   "Author": "Apache",
   "Maintainer": "tim.g.robinson@gmail.com",
-  "MasterSites": "http://archive.apache.org/dist/incubator/log4net/1.2.10/",
-  "Library": {
+  "MasterSites": [ "http://archive.apache.org/dist/incubator/log4net/1.2.10/" ],
+  "Libraries": {
     "log4net.dll": {
       "Binary": "incubating-log4net-1.2.10.zip#log4net-1.2.10/bin/net/2.0/release/log4net.dll"
     },
@@ -56,8 +56,8 @@
   "Description": ".NET port of the excellent Java Hibernate which provides Object/Relational mapping to persist objects in a relational database",
   "Author": "Ayende Rahien",
   "Maintainer": "tim.g.robinson@gmail.com",
-  "MasterSites": "http://downloads.sourceforge.net/project/nhibernate/NHibernate/2.1.2GA/",
-  "Library": {
+  "MasterSites": [ "http://downloads.sourceforge.net/project/nhibernate/NHibernate/2.1.2GA/" ],
+  "Libraries": {
     "NHibernate.dll": {
       "Binary": "NHibernate-2.1.2.GA-bin.zip#Required_Bins/NHibernate.dll"
     },
@@ -72,8 +72,8 @@
   "Description": "Test framework for all .Net languages, running on Microsoft .NET and Mono",
   "Author": "Charlie Poole",
   "Maintainer": "tim.g.robinson@gmail.com",
-  "MasterSites": "http://launchpad.net/nunitv2/2.5/2.5.5/+download/",
-  "Library": {
+  "MasterSites": [ "http://launchpad.net/nunitv2/2.5/2.5.5/+download/" ],
+  "Libraries": {
     "nunit.framework.dll": {
       "Binary": "NUnit-2.5.5.10112.zip#NUnit-2.5.5.10112/bin/net-2.0/framework/nunit.framework.dll"
     },
@@ -88,31 +88,31 @@
   "Description": "Generic Graph Data Structures and Algorithms for .Net",
   "Author": "Jonathan de Halleux",
   "Maintainer": "tim.g.robinson@gmail.com",
-  "MasterSites": "http://download.codeplex.com/Project/Download/",
-  "Library": {
+  "MasterSites": [ "http://download.codeplex.com/Project/Download/" ],
+  "Libraries": {
     "QuickGraph.dll": {
-      "Binary": "FileDownload.aspx?ProjectName=quickgraph&DownloadId=50945&FileTime=128956893024170000&Build=16504#QuickGraph.dll"
+      "Binary": "FileDownload.aspx?ProjectName=quickgraph&DownloadId=50945&FileTime=128956893024170000&Build=16586#QuickGraph.dll"
     },
     "QuickGraph.xml": {
-      "Binary": "FileDownload.aspx?ProjectName=quickgraph&DownloadId=50945&FileTime=128956893024170000&Build=16504#QuickGraph.xml"
+      "Binary": "FileDownload.aspx?ProjectName=quickgraph&DownloadId=50945&FileTime=128956893024170000&Build=16586#QuickGraph.xml"
     },
     "QuickGraph.Data.dll": {
-      "Binary": "FileDownload.aspx?ProjectName=quickgraph&DownloadId=50945&FileTime=128956893024170000&Build=16504#QuickGraph.Data.dll"
+      "Binary": "FileDownload.aspx?ProjectName=quickgraph&DownloadId=50945&FileTime=128956893024170000&Build=16586#QuickGraph.Data.dll"
     },
     "QuickGraph.Data.xml": {
-      "Binary": "FileDownload.aspx?ProjectName=quickgraph&DownloadId=50945&FileTime=128956893024170000&Build=16504#QuickGraph.Data.xml"
+      "Binary": "FileDownload.aspx?ProjectName=quickgraph&DownloadId=50945&FileTime=128956893024170000&Build=16586#QuickGraph.Data.xml"
     },
     "QuickGraph.Glee.dll": {
-      "Binary": "FileDownload.aspx?ProjectName=quickgraph&DownloadId=50945&FileTime=128956893024170000&Build=16504#QuickGraph.Glee.dll"
+      "Binary": "FileDownload.aspx?ProjectName=quickgraph&DownloadId=50945&FileTime=128956893024170000&Build=16586#QuickGraph.Glee.dll"
     },
     "QuickGraph.Glee.xml": {
-      "Binary": "FileDownload.aspx?ProjectName=quickgraph&DownloadId=50945&FileTime=128956893024170000&Build=16504#QuickGraph.Glee.xml"
+      "Binary": "FileDownload.aspx?ProjectName=quickgraph&DownloadId=50945&FileTime=128956893024170000&Build=16586#QuickGraph.Glee.xml"
     },
     "QuickGraph.Graphviz.dll": {
-      "Binary": "FileDownload.aspx?ProjectName=quickgraph&DownloadId=50945&FileTime=128956893024170000&Build=16504#QuickGraph.Graphviz.dll"
+      "Binary": "FileDownload.aspx?ProjectName=quickgraph&DownloadId=50945&FileTime=128956893024170000&Build=16586#QuickGraph.Graphviz.dll"
     },
     "QuickGraph.Graphviz.xml": {
-      "Binary": "FileDownload.aspx?ProjectName=quickgraph&DownloadId=50945&FileTime=128956893024170000&Build=16504#QuickGraph.Graphviz.xml"
+      "Binary": "FileDownload.aspx?ProjectName=quickgraph&DownloadId=50945&FileTime=128956893024170000&Build=16586#QuickGraph.Graphviz.xml"
     }
   }
 },
@@ -122,8 +122,8 @@
   "Description": "Dynamic mock object framework for the .Net platform",
   "Author": "Ayende Rahien",
   "Maintainer": "tim.g.robinson@gmail.com",
-  "MasterSites": "http://www.ayende.com/20/section.aspx/download/",
-  "Library": {
+  "MasterSites": [ "http://www.ayende.com/20/section.aspx/download/" ],
+  "Libraries": {
     "Rhino.Mocks.dll": {
       "Binary": "234#Rhino.Mocks.dll"
     },
@@ -138,8 +138,8 @@
   "Description": "Zip, GZip, Tar and BZip2 library written entirely in C# for the .NET platform.",
   "Author": "IC# Code",
   "Maintainer": "tim.g.robinson@gmail.com",
-  "MasterSites": "http://downloads.sourceforge.net/project/sharpdevelop/SharpZipLib/0.85.5/",
-  "Library": {
+  "MasterSites": [ "http://downloads.sourceforge.net/project/sharpdevelop/SharpZipLib/0.85.5/" ],
+  "Libraries": {
     "ICSharpCode.SharpZipLib.dll": {
       "Binary": "SharpZipLib_0855_Bin.zip#net-20/ICSharpCode.SharpZipLib.dll"
     }

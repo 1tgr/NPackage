@@ -4,8 +4,8 @@
   "Description": "Test framework for all .Net languages, running on Microsoft .NET and Mono",
   "Author": "Charlie Poole",
   "Maintainer": "tim.g.robinson@gmail.com",
-  "MasterSites": "http://launchpad.net/nunitv2/2.5/2.5.5/+download/",
-  "Library": {
+  "MasterSites": [ "http://launchpad.net/nunitv2/2.5/2.5.5/+download/" ],
+  "Libraries": {
     "nunit.framework.dll": {
       "Binary": "NUnit-2.5.5.10112.zip#NUnit-2.5.5.10112/bin/net-2.0/framework/nunit.framework.dll"
     },

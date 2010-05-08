@@ -4,8 +4,8 @@
   "Description": "Makes working with JSON formatted data in .NET simple",
   "Author": "James Newton-King",
   "Maintainer": "tim.g.robinson@gmail.com",
-  "MasterSites": "http://download.codeplex.com/Project/Download/",
-  "Library": {
+  "MasterSites": [ "http://download.codeplex.com/Project/Download/" ],
+  "Libraries": {
     "Newtonsoft.Json.dll": {
       "Binary": "FileDownload.aspx?ProjectName=Json&DownloadId=117351&FileTime=129162242226600000&Build=16504#Bin/DotNet/Newtonsoft.Json.dll"
     },
