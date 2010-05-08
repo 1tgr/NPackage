@@ -1,0 +1,6 @@
+#!/bin/bash
+scriptsDir=`dirname $0`
+webJsonDir=$scriptsDir/../web-json
+echo "{ \"Packages\": ["
+find $webJsonDir -name "*.np" | xargs -I % bash -c "cat % && echo ,"
+echo "] }"

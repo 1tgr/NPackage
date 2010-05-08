@@ -4,12 +4,14 @@ using System.IO;
 using ICSharpCode.SharpZipLib.GZip;
 using ICSharpCode.SharpZipLib.Tar;
 using ICSharpCode.SharpZipLib.Zip;
+using Newtonsoft.Json;
 using NPackage.Core.Extensions;
 
 namespace NPackage.Core
 {
     public class InstallCommand
     {
+        private static readonly JsonSerializer serializer = new JsonSerializer();
         private readonly DownloadWorkflow workflow = new DownloadWorkflow();
         private readonly string libPath = FindLibDirectory();
         private readonly string archivePath;
@@ -53,26 +55,46 @@ namespace NPackage.Core
             return path;
         }
 
-        private void DownloadPackageFile(Uri packageUri)
+        private static Package FindPackage(Repository repository, string name)
         {
-            workflow.Enqueue(packageUri, archivePath + Path.DirectorySeparatorChar, packageFilename => DownloadPackageContents(packageUri, packageFilename));
+            foreach (Package package in repository.Packages)
+            {
+                if (package.Name == name ||
+                    package.Name + "-" + package.Version == name)
+                {
+                    return package;
+                }
+            }
+
+            string message = string.Format("There is no package called {0}.", name);
+            throw new ArgumentException(message, "name");
         }
 
-        private void DownloadPackageContents(Uri packageUri, string packageFilename)
+        private void InstallPackages(string repositoryFilename, Uri repositoryUri, IEnumerable<string> packageNames)
         {
-            Package package = new Package();
+            Repository repository;
 
-            using (TextReader reader = new StreamReader(packageFilename))
-                PackageParser.ParseYaml(reader, package);
+            using (TextReader textReader = new StreamReader(repositoryFilename))
+            using (JsonReader jsonReader = new JsonTextReader(textReader))
+                repository = serializer.Deserialize<Repository>(jsonReader);
 
-            Uri siteUri = new Uri(packageUri.GetLeftPart(UriPartial.Path));
-            if (package.MasterSites != null)
-                siteUri = new Uri(siteUri, package.MasterSites);
+            foreach (string name in packageNames)
+            {
+                Package package = FindPackage(repository, name);
+                DownloadPackageContents(repositoryUri, package);
+            }
+        }
+
+        private void DownloadPackageContents(Uri repositoryUri, Package package)
+        {
+            Uri siteUri = new Uri(repositoryUri.GetLeftPart(UriPartial.Path));
+            if (package.MasterSites.Count > 0)
+                siteUri = new Uri(siteUri, package.MasterSites[0]);
 
             string packagePath = Path.Combine(libPath, Path.Combine(package.Name, package.Version));
             Directory.CreateDirectory(packagePath);
 
-            foreach (KeyValuePair<string, Library> pair in package.Library)
+            foreach (KeyValuePair<string, Library> pair in package.Libraries)
             {
                 Uri downloadUri = new Uri(siteUri, pair.Value.Binary);
                 string filename = Path.Combine(packagePath, pair.Key);
@@ -159,8 +181,8 @@ namespace NPackage.Core
         {
             Directory.CreateDirectory(archivePath);
 
-            foreach (string arg in args)
-                DownloadPackageFile(new Uri(arg));
+            Uri repositoryUri = new Uri("http://np.partario.com/packages.js");
+            workflow.Enqueue(repositoryUri, archivePath + Path.DirectorySeparatorChar, repositoryFilename => InstallPackages(repositoryFilename, repositoryUri, args));
 
             int steps = 1;
             do
