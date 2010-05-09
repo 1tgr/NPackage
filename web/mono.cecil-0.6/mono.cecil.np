@@ -1,5 +1,5 @@
 {
-  "Name": "cecil",
+  "Name": "mono.cecil",
   "Version": "0.6",
   "Description": "Library to generate and inspect programs and libraries in the ECMA CIL form",
   "Author": "Jb Evain",

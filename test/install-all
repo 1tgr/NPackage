@@ -3,4 +3,13 @@ testDir=`dirname $0`
 binDir=$testDir/../bin/Debug
 libDir=$testDir/lib
 rm -r $libDir/.dist $libDir/*
-exec mono $binDir/NPackage.exe cecil json log4net nhibernate rhino.mocks nunit quickgraph sharpziplib
+exec mono $binDir/NPackage.exe \
+    json \
+    log4net \
+    mono.cecil \
+    mono.options
+    nhibernate \
+    rhino.mocks \
+    nunit \
+    quickgraph \
+    sharpziplib \

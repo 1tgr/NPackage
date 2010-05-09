@@ -1,21 +1,5 @@
 { "Packages": [
 {
-  "Name": "cecil",
-  "Version": "0.6",
-  "Description": "Library to generate and inspect programs and libraries in the ECMA CIL form",
-  "Author": "Jb Evain",
-  "Maintainer": "tim.g.robinson@gmail.com",
-  "MasterSites": [ "http://mono.ximian.com/daily/" ],
-  "Libraries": {
-    "Mono.Cecil.dll": {
-      "Binary": "monocharge-20100503.tar.gz#monocharge-20100503/2.0/Mono.Cecil.dll"
-    },
-    "Mono.Cecil.Mdb.dll": {
-      "Binary": "monocharge-20100503.tar.gz#monocharge-20100503/2.0/Mono.Cecil.Mdb.dll"
-    }
-  }
-},
-{
   "Name": "json",
   "Version": "7",
   "Description": "Makes working with JSON formatted data in .NET simple",
@@ -47,6 +31,35 @@
     },
     "log4net.xml": {
       "Binary": "incubating-log4net-1.2.10.zip#log4net-1.2.10/bin/net/2.0/release/log4net.xml"
+    }
+  }
+},
+{
+  "Name": "mono.cecil",
+  "Version": "0.6",
+  "Description": "Library to generate and inspect programs and libraries in the ECMA CIL form",
+  "Author": "Jb Evain",
+  "Maintainer": "tim.g.robinson@gmail.com",
+  "MasterSites": [ "http://mono.ximian.com/daily/" ],
+  "Libraries": {
+    "Mono.Cecil.dll": {
+      "Binary": "monocharge-20100503.tar.gz#monocharge-20100503/2.0/Mono.Cecil.dll"
+    },
+    "Mono.Cecil.Mdb.dll": {
+      "Binary": "monocharge-20100503.tar.gz#monocharge-20100503/2.0/Mono.Cecil.Mdb.dll"
+    }
+  }
+},
+{
+  "Name": "mono.options",
+  "Version": "0.2.1",
+  "Description": "Callback-based program option parser for C#",
+  "Author": "Jonathan Pryor",
+  "Maintainer": "tim.g.robinson@gmail.com",
+  "MasterSites": [ "http://mono.ximian.com/daily/" ],
+  "Libraries": {
+    "Mono.Options.dll": {
+      "Binary": "monocharge-20100503.tar.gz#monocharge-20100503/2.0/Mono.Options.dll"
     }
   }
 },

@@ -1,6 +1,6 @@
 #!/bin/bash
 scriptsDir=`dirname $0`
-webJsonDir=$scriptsDir/../web-json
+webDir=$scriptsDir/../web
 echo "{ \"Packages\": ["
-find $webJsonDir -name "*.np" | xargs -I % bash -c "cat % && echo ,"
+find $webDir -name "*.np" | xargs -I % bash -c "cat % && echo ,"
 echo "] }"

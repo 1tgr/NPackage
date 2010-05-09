@@ -1,0 +1,13 @@
+{
+  "Name": "mono.options",
+  "Version": "0.2.1",
+  "Description": "Callback-based program option parser for C#",
+  "Author": "Jonathan Pryor",
+  "Maintainer": "tim.g.robinson@gmail.com",
+  "MasterSites": [ "http://mono.ximian.com/daily/" ],
+  "Libraries": {
+    "Mono.Options.dll": {
+      "Binary": "monocharge-20100503.tar.gz#monocharge-20100503/2.0/Mono.Options.dll"
+    }
+  }
+}
