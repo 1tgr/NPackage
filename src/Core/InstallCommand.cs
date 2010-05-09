@@ -6,10 +6,11 @@ using ICSharpCode.SharpZipLib.Tar;
 using ICSharpCode.SharpZipLib.Zip;
 using Newtonsoft.Json;
 using NPackage.Core.Extensions;
+using Mono.Options;
 
 namespace NPackage.Core
 {
-    public class InstallCommand
+    public class InstallCommand : CommandBase
     {
         private static readonly JsonSerializer serializer = new JsonSerializer();
         private readonly DownloadWorkflow workflow = new DownloadWorkflow();
@@ -19,8 +20,16 @@ namespace NPackage.Core
 
         public InstallCommand()
         {
+            RepositoryUri = new Uri("http://np.partario.com/packages.js");
+
             archivePath = Path.Combine(libPath, ".dist");
             workflow.Log += OnWorkflowLog;
+        }
+
+        protected override void AddOptions(OptionSet set)
+        {
+            base.AddOptions(set);
+            set.Add("r|repository", "URL of the packages.js file", (Uri v) => RepositoryUri = v);
         }
 
         private void Log(string format, params object[] args)
@@ -70,7 +79,7 @@ namespace NPackage.Core
             throw new ArgumentException(message, "name");
         }
 
-        private void InstallPackages(string repositoryFilename, Uri repositoryUri, IEnumerable<string> packageNames)
+        private void InstallPackages(string repositoryFilename)
         {
             Repository repository;
 
@@ -78,18 +87,18 @@ namespace NPackage.Core
             using (JsonReader jsonReader = new JsonTextReader(textReader))
                 repository = serializer.Deserialize<Repository>(jsonReader);
 
-            foreach (string name in packageNames)
+            foreach (string name in PackageNames)
             {
                 Package package = FindPackage(repository, name);
-                DownloadPackageContents(repositoryUri, package);
+                DownloadPackageContents(package);
             }
         }
 
-        private void DownloadPackageContents(Uri repositoryUri, Package package)
+        private void DownloadPackageContents(Package package)
         {
-            Uri siteUri = new Uri(repositoryUri.GetLeftPart(UriPartial.Path));
-            if (package.MasterSites.Count > 0)
-                siteUri = new Uri(siteUri, package.MasterSites[0]);
+            Uri siteUri = package.MasterSites.Count > 0
+                ? new Uri(RepositoryUri, package.MasterSites[0])
+                : RepositoryUri;
 
             string packagePath = Path.Combine(libPath, Path.Combine(package.Name, package.Version));
             Directory.CreateDirectory(packagePath);
@@ -177,12 +186,10 @@ namespace NPackage.Core
                 throw new NotSupportedException(archiveFilename + " is not a recognised archive.");
         }
 
-        public int Run(string[] args)
+        protected override int RunCore()
         {
             Directory.CreateDirectory(archivePath);
-
-            Uri repositoryUri = new Uri("http://np.partario.com/packages.js");
-            workflow.Enqueue(repositoryUri, archivePath + Path.DirectorySeparatorChar, repositoryFilename => InstallPackages(repositoryFilename, repositoryUri, args));
+            workflow.Enqueue(RepositoryUri, archivePath + Path.DirectorySeparatorChar, InstallPackages);
 
             int steps = 1;
             do
@@ -193,6 +200,13 @@ namespace NPackage.Core
             } while (workflow.Step());
 
             return 0;
+        }
+
+        public Uri RepositoryUri { get; set; }
+
+        public IList<string> PackageNames
+        {
+            get { return ExtraArguments; }
         }
     }
 }

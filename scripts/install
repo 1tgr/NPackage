@@ -1,4 +1,4 @@
 #!/bin/sh
 scriptsDir=`dirname $0`
 binDir=$scriptsDir/../Bin/Debug
-exec mono $binDir/NPackage.exe json mono.options nunit sharpziplib
+exec mono $binDir/NPackage.exe install json mono.options nunit sharpziplib

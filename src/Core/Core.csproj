@@ -75,8 +75,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CommandBase.cs" />
     <Compile Include="DownloadWorkflow.cs" />
     <Compile Include="Extensions\StreamExtensions.cs" />
+    <Compile Include="HelpCommand.cs" />
+    <Compile Include="ICommand.cs" />
     <Compile Include="InstallCommand.cs" />
     <Compile Include="LogEventArgs.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

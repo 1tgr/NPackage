@@ -3,7 +3,7 @@ testDir=`dirname $0`
 binDir=$testDir/../bin/Debug
 libDir=$testDir/lib
 rm -r $libDir/.dist $libDir/*
-exec mono $binDir/NPackage.exe \
+exec mono $binDir/NPackage.exe install \
     json \
     log4net \
     mono.cecil \
