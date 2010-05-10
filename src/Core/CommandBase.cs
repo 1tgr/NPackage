@@ -8,16 +8,9 @@ namespace NPackage.Core
     {
         private readonly List<string> extraArguments = new List<string>();
 
-        protected virtual void AddOptions(OptionSet set)
-        {
-            set.Add("h|help", "show this message and exit", v => ShowHelp = v != null);
-        }
-
         protected virtual OptionSet CreateOptionSet()
         {
-            OptionSet set = new OptionSet();
-            AddOptions(set);
-            return set;
+            return new OptionSet().Add("h|help", "show this message and exit", v => ShowHelp = v != null);
         }
 
         public void ParseOptions(IEnumerable<string> arguments)

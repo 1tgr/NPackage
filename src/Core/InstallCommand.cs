@@ -30,10 +30,11 @@ namespace NPackage.Core
             archiveDirectory = archivePath + Path.DirectorySeparatorChar;
         }
 
-        protected override void AddOptions(OptionSet set)
+        protected override OptionSet CreateOptionSet()
         {
-            base.AddOptions(set);
-            set.Add("r|repository", "URL of the packages.js file", (Uri v) => RepositoryUri = v);
+            return base
+                .CreateOptionSet()
+                .Add("r|repository", "URL of the packages.js file", (Uri v) => RepositoryUri = v);
         }
 
         private void Log(string format, params object[] args)

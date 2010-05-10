@@ -70,6 +70,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Core.FSharp\Core.FSharp.fsproj">
+      <Project>{56B1EEC3-BE0D-488F-AD38-5E9FDD7F3876}</Project>
+      <Name>Core.FSharp</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Core\Core.csproj">
       <Project>{6BA63584-7678-4C8E-91D5-AE36AD992ADB}</Project>
       <Name>Core</Name>
