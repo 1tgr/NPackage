@@ -16,14 +16,18 @@ namespace NPackage.Core
         private readonly DownloadWorkflow workflow = new DownloadWorkflow();
         private readonly string libPath = FindLibDirectory();
         private readonly string archivePath;
+        private readonly string archiveDirectory;
+        private readonly Dictionary<string, Package> packages = new Dictionary<string, Package>(StringComparer.InvariantCultureIgnoreCase);
         private bool logNeedsIndent;
+        private int steps;
 
         public InstallCommand()
         {
             RepositoryUri = new Uri("http://np.partario.com/packages.js");
 
-            archivePath = Path.Combine(libPath, ".dist");
             workflow.Log += OnWorkflowLog;
+            archivePath = Path.Combine(libPath, ".dist");
+            archiveDirectory = archivePath + Path.DirectorySeparatorChar;
         }
 
         protected override void AddOptions(OptionSet set)
@@ -64,34 +68,57 @@ namespace NPackage.Core
             return path;
         }
 
-        private static Package FindPackage(Repository repository, string name)
+        private Package FindPackage(string name)
         {
-            foreach (Package package in repository.Packages)
+            Package package;
+            if (packages.TryGetValue(name, out package))
+                return package;
+            else
             {
-                if (package.Name == name ||
-                    package.Name + "-" + package.Version == name)
-                {
-                    return package;
-                }
+                string message = string.Format("There is no package called {0}.", name);
+                throw new ArgumentException(message, "name");
             }
-
-            string message = string.Format("There is no package called {0}.", name);
-            throw new ArgumentException(message, "name");
         }
 
-        private void InstallPackages(string repositoryFilename)
+        private void RegisterPackage(Package package)
+        {
+            packages[package.Name + "-" + package.Version] = package;
+
+            Package latestPackage;
+            if (!packages.TryGetValue(package.Name, out latestPackage) ||
+                string.Compare(package.Version, latestPackage.Version, StringComparison.InvariantCultureIgnoreCase) > 0)
+            {
+                packages[package.Name] = package;
+            }
+        }
+
+        private void RegisterPackage(string filename)
+        {
+            Package package;
+
+            using (TextReader textReader = new StreamReader(filename))
+            using (JsonReader jsonReader = new JsonTextReader(textReader))
+                package = serializer.Deserialize<Package>(jsonReader);
+
+            RegisterPackage(package);
+        }
+
+        private void RegisterRepository(string filename)
         {
             Repository repository;
 
-            using (TextReader textReader = new StreamReader(repositoryFilename))
+            using (TextReader textReader = new StreamReader(filename))
             using (JsonReader jsonReader = new JsonTextReader(textReader))
                 repository = serializer.Deserialize<Repository>(jsonReader);
 
-            foreach (string name in PackageNames)
-            {
-                Package package = FindPackage(repository, name);
-                DownloadPackageContents(package);
-            }
+            foreach (Package package in repository.Packages)
+                RegisterPackage(package);
+
+            foreach (Uri uri in repository.RepositoryImports)
+                workflow.Enqueue(uri, archiveDirectory, RegisterRepository);
+
+            foreach (Uri uri in repository.PackageImports)
+                workflow.Enqueue(uri, archiveDirectory, RegisterPackage);
         }
 
         private void DownloadPackageContents(Package package)
@@ -113,7 +140,7 @@ namespace NPackage.Core
                 {
                     UriBuilder archiveUriBuilder = new UriBuilder(downloadUri) { Fragment = String.Empty };
                     Uri archiveUri = archiveUriBuilder.Uri;
-                    workflow.Enqueue(archiveUri, archivePath + Path.DirectorySeparatorChar, archiveFilename => UnpackArchive(archiveFilename, downloadUri, filename));
+                    workflow.Enqueue(archiveUri, archiveDirectory, archiveFilename => UnpackArchive(archiveFilename, downloadUri, filename));
                 }
             }
         }
@@ -145,7 +172,7 @@ namespace NPackage.Core
             throw new InvalidOperationException(message);
         }
 
-        private void ExtractFile(string archiveFilename, string entryName, string filename)
+        private static void ExtractFile(string archiveFilename, string entryName, string filename)
         {
             if (archiveFilename.EndsWith(".zip", StringComparison.InvariantCultureIgnoreCase))
             {
@@ -186,19 +213,29 @@ namespace NPackage.Core
                 throw new NotSupportedException(archiveFilename + " is not a recognised archive.");
         }
 
+        private void RunWorkflow()
+        {
+            do
+            {
+                steps++;
+                Console.Write("[ {0,3} ] ", steps);
+                logNeedsIndent = false;
+            } while (workflow.Step());
+        }
+
         protected override int RunCore()
         {
             Directory.CreateDirectory(archivePath);
-            workflow.Enqueue(RepositoryUri, archivePath + Path.DirectorySeparatorChar, InstallPackages);
+            workflow.Enqueue(RepositoryUri, archiveDirectory, RegisterRepository);
+            RunWorkflow();
 
-            int steps = 1;
-            do
+            foreach (string name in PackageNames)
             {
-                Console.Write("[ {0,3} ] ", steps);
-                logNeedsIndent = false;
-                steps++;
-            } while (workflow.Step());
+                Package package = FindPackage(name);
+                DownloadPackageContents(package);
+            }
 
+            RunWorkflow();
             return 0;
         }
 
