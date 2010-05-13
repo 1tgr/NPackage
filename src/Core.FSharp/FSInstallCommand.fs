@@ -8,6 +8,7 @@ open Newtonsoft.Json
 type FSInstallCommand() =
     inherit CommandBase()
     let mutable repositoryUri = new Uri("http://np.partario.com/packages.js")
+    let serializer = new JsonSerializer()
 
     override this.CreateOptionSet() =
         base.CreateOptionSet()
@@ -44,9 +45,8 @@ type FSInstallCommand() =
 
         let rec buildGraph (map : #IDictionary<string, Package>) uri = Download.workflow {
                 let! repositoryFilename = Download.fetch uri archiveDirectory
-                let textReader = new StreamReader(repositoryFilename)
-                let jsonReader = new JsonTextReader(textReader)
-                let serializer = new JsonSerializer()
+                use textReader = new StreamReader(repositoryFilename)
+                use jsonReader = new JsonTextReader(textReader)
                 let repository = serializer.Deserialize<Repository>(jsonReader)
 
                 let! zz = repository.RepositoryImports
