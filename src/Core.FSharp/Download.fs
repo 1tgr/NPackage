@@ -3,13 +3,11 @@
 
     let fetch uri filename = DownloadState [Fetch(uri, filename)]
 
-    let map f list =
-        list
-        |> List.map (fun x ->
-            match f x with
+    let sequence =
+        List.map (function
             | DownloadState list -> list)
-        |> List.concat
-        |> DownloadState
+        >> List.concat
+        >> DownloadState
 
     let rec enqueue (workflow : DownloadWorkflow) (DownloadState list) =
         let rec enqueue' =

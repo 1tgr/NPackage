@@ -1,6 +1,7 @@
 ﻿namespace NPackage.Core
 
 open System
+open System.Collections.Generic
 open System.IO
 open Newtonsoft.Json
 
@@ -13,7 +14,7 @@ type FSInstallCommand() =
             .Add("r|repository", "URL of the packages.js file", fun (v : Uri) -> this.RepositoryUri <- v)
 
     override this.RunCore() =
-        let archiveDirectory = 
+        let archivePath = 
             let root = Path.Combine(Path.GetPathRoot(Environment.CurrentDirectory), "lib")
             let rec findLibDirectory path =
                 if Directory.Exists(path) then
@@ -27,31 +28,47 @@ type FSInstallCommand() =
 
             findLibDirectory "lib"
 
-        let downloadLibrary (package : Package) name (library : Library) = Download.workflow {
+        let archiveDirectory = archivePath + Path.DirectorySeparatorChar.ToString()
+
+        let downloadPackage (package : Package) = 
+            let downloadLibrary name (library : Library) = Download.workflow {
                 let uri = new Uri(new Uri(package.MasterSites.[0]), library.Binary)
                 let! libraryFilename = Download.fetch uri (Path.Combine(archiveDirectory, name))
                 printfn "Got %s" libraryFilename
             }
 
-        let downloadPackage (package : Package) = 
             package.Libraries
             |> List.ofSeq
-            |> Download.map (fun pair -> downloadLibrary package pair.Key pair.Value)
+            |> List.map (fun pair -> downloadLibrary pair.Key pair.Value)
+            |> Download.sequence
 
-        let b = Download.workflow {
-                let! repositoryFilename = Download.fetch repositoryUri archiveDirectory
+        let rec buildGraph (map : #IDictionary<string, Package>) uri = Download.workflow {
+                let! repositoryFilename = Download.fetch uri archiveDirectory
                 let textReader = new StreamReader(repositoryFilename)
                 let jsonReader = new JsonTextReader(textReader)
                 let serializer = new JsonSerializer()
                 let repository = serializer.Deserialize<Repository>(jsonReader)
-                return! Download.map downloadPackage (List.ofSeq repository.Packages)
+
+                let! zz = repository.RepositoryImports
+                          |> List.ofSeq
+                          |> List.map (buildGraph map)
+                          |> Download.sequence
+                ignore zz
+
+                let addPackages packages map =
+                    for package in repository.Packages do
+                        map.[package.Name] <- package
+                        map.[package.Name + "-" + package.Version] <- package
+                addPackages repository.Packages map
             }
 
         let workflow = new DownloadWorkflow()
         use subscription = workflow.Log.Subscribe(fun (e : LogEventArgs) -> printfn "%s" e.Message)
-        Download.enqueue workflow b
+        let map = new Dictionary<string, Package>()
+        Download.enqueue workflow (buildGraph map repositoryUri)
         while workflow.Step() do
             ()
+        printfn "Got %d packages" map.Count
         0
 
     member this.RepositoryUri
