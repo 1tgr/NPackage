@@ -38,10 +38,10 @@ type FSInstallCommand() =
                 printfn "Got %s" libraryFilename
             }
 
-            Download.workflow {
-                for pair in package.Libraries do
-                    do! downloadLibrary pair.Key pair.Value
-            }
+            package.Libraries
+            |> List.ofSeq
+            |> List.map (fun pair -> downloadLibrary pair.Key pair.Value)
+            |> Download.batch
 
         let rec buildGraph (map : #IDictionary<string, Package>) uri = Download.workflow {
                 let! repositoryFilename = Download.fetch uri archiveDirectory
@@ -49,17 +49,26 @@ type FSInstallCommand() =
                 use jsonReader = new JsonTextReader(textReader)
                 let repository = serializer.Deserialize<Repository>(jsonReader)
 
-                for importUri in repository.RepositoryImports do
-                    do! buildGraph map importUri
+                do! repository.RepositoryImports
+                    |> List.ofSeq
+                    |> List.map (buildGraph map)
+                    |> Download.batch
 
                 for package in repository.Packages do
                     map.[package.Name] <- package
                     map.[package.Name + "-" + package.Version] <- package
-                    do! downloadPackage package
+
+                return! repository.Packages
+                        |> List.ofSeq
+                        |> List.map downloadPackage
+                        |> Download.batch
             }
 
         let map = new Dictionary<string, Package>()
-        Download.run (buildGraph map repositoryUri)
+
+        buildGraph map repositoryUri
+        |> Download.run
+
         printfn "Got %d packages" map.Count
         0
 

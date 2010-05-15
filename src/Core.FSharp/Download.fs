@@ -4,7 +4,7 @@ open System
 module Download =
     let mutable steps = 0
 
-    let run (DownloadState(m, f)) =
+    let run (DownloadState(m, f) as state) =
         if not (Map.isEmpty m) then
             let workflow = new DownloadWorkflow()
             use subscription = workflow.Log.Subscribe(fun (e : LogEventArgs) -> printfn "[%d] %s" steps e.Message)
@@ -17,10 +17,22 @@ module Download =
             steps <- steps + 1
             while workflow.Step() do
                 ()
-
         f ()
 
-    let succeed x = DownloadState(Map.empty, fun () -> x)
+    let private succeed x = DownloadState(Map.empty, fun () -> x)
+
+    let private appendWith f = Map.fold (fun map1 key value2 -> 
+            match Map.tryFind key map1 with
+            | Some value1 -> Map.add key (f value1 value2) map1
+            | None -> Map.add key value2 map1)
+
+    let batch = function
+        | [] -> succeed ()
+        | states ->
+            let map = states
+                      |> List.map (fun (DownloadState(m, _)) -> m)
+                      |> List.reduce (appendWith List.append)
+            DownloadState(map, fun () -> List.iter (fun (DownloadState(_, f)) -> f ()) states)
 
     let private bind (DownloadState(m, _) as state) f =
         DownloadState(m, fun () ->
@@ -49,7 +61,7 @@ module Download =
         let map = Map.add { Uri = uri; Filename = filename } [r] Map.empty
         DownloadState(map, fun () -> 
             match !r with
-            | Some s-> s
+            | Some s -> s
             | None -> raise (new InvalidOperationException("Expected a file name for " + uri.ToString() + ".")))
 
     type DownloadWorkflowBuilder() =
@@ -67,6 +79,8 @@ module Download =
             )
 
         member b.Return(x) = succeed x
+
+        member b.ReturnFrom(state) = state
 
         member b.TryFinally (state, f) = try_finally state f
 
