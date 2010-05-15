@@ -38,6 +38,7 @@
   <ItemGroup>
     <Compile Include="UriKey.fs" />
     <Compile Include="DownloadState.fs" />
+    <Compile Include="MapExtensions.fs" />
     <Compile Include="Download.fs" />
     <Compile Include="FSInstallCommand.fs" />
   </ItemGroup>

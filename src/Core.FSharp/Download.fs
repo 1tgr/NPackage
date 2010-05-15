@@ -1,4 +1,5 @@
 ﻿namespace NPackage.Core
+
 open System
 
 module Download =
@@ -21,18 +22,17 @@ module Download =
 
     let private succeed x = DownloadState(Map.empty, fun () -> x)
 
-    let private appendWith f = Map.fold (fun map1 key value2 -> 
-            match Map.tryFind key map1 with
-            | Some value1 -> Map.add key (f value1 value2) map1
-            | None -> Map.add key value2 map1)
+    let rec private merge =
+        function
+        | [] -> Map.empty
+        | [DownloadState(m, _)] -> m
+        | DownloadState(m, _) :: tail -> MapExtensions.appendWith List.append m (merge tail)
 
-    let batch = function
-        | [] -> succeed ()
-        | states ->
-            let map = states
-                      |> List.map (fun (DownloadState(m, _)) -> m)
-                      |> List.reduce (appendWith List.append)
-            DownloadState(map, fun () -> List.iter (fun (DownloadState(_, f)) -> f ()) states)
+    let batch_ states =
+        DownloadState(merge states, fun () -> List.iter (fun (DownloadState(_, f)) -> f ()) states)
+
+    let batch states =
+        DownloadState(merge states, fun () -> List.map (fun (DownloadState(_, f)) -> f ()) states)
 
     let private bind (DownloadState(m, _) as state) f =
         DownloadState(m, fun () ->
@@ -70,7 +70,7 @@ module Download =
         member b.BindUsing(state, f) = bind state (fun r -> using r f)
 
         member b.Combine(DownloadState(m1, f1), DownloadState(m2, f2)) =
-            DownloadState(appendWith List.append m1 m2, fun () -> 
+            DownloadState(MapExtensions.appendWith List.append m1 m2, fun () -> 
                 f1 () 
                 f2 ())
  

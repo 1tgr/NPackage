@@ -41,35 +41,30 @@ type FSInstallCommand() =
             package.Libraries
             |> List.ofSeq
             |> List.map (fun pair -> downloadLibrary pair.Key pair.Value)
-            |> Download.batch
+            |> Download.batch_
 
-        let rec buildGraph (map : #IDictionary<string, Package>) uri = Download.workflow {
+        let rec buildGraph map uri = Download.workflow {
                 let! repositoryFilename = Download.fetch uri archiveDirectory
                 use textReader = new StreamReader(repositoryFilename)
                 use jsonReader = new JsonTextReader(textReader)
                 let repository = serializer.Deserialize<Repository>(jsonReader)
 
-                do! repository.RepositoryImports
-                    |> List.ofSeq
-                    |> List.map (buildGraph map)
-                    |> Download.batch
+                let! maps = repository.RepositoryImports
+                            |> List.ofSeq
+                            |> List.map (buildGraph map)
+                            |> Download.batch
 
-                for package in repository.Packages do
-                    map.[package.Name] <- package
-                    map.[package.Name + "-" + package.Version] <- package
-
-                return! repository.Packages
+                let map' = List.fold (MapExtensions.appendWith (fun _ value -> value)) map maps
+                return repository.Packages
                         |> List.ofSeq
-                        |> List.map downloadPackage
-                        |> Download.batch
+                        |> List.fold (fun m package -> 
+                            m
+                            |> Map.add package.Name package
+                            |> Map.add (package.Name + "-" + package.Version) package) map'
             }
 
-        let map = new Dictionary<string, Package>()
-
-        buildGraph map repositoryUri
-        |> Download.run
-
-        printfn "Got %d packages" map.Count
+        let map = Download.run (buildGraph Map.empty repositoryUri)
+        printfn "Got %d packages" ((Map.toArray map).Length)
         0
 
     member this.RepositoryUri
