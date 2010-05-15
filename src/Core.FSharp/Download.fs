@@ -5,18 +5,18 @@ module Download =
     let mutable steps = 0
 
     let run (DownloadState(m, f) as state) =
-        if not (Map.isEmpty m) then
-            let workflow = new DownloadWorkflow()
-            use subscription = workflow.Log.Subscribe(fun (e : LogEventArgs) -> printfn "[%d] %s" steps e.Message)
-            Map.iter (fun { Uri = uri; Filename = filename } -> 
-                List.iter (fun ref -> 
-                    match !ref with
-                    | None -> workflow.Enqueue(uri, filename, fun s -> ref := Some s)
-                    | Some _ -> ())) m
+        let workflow = new DownloadWorkflow()
+        use subscription = workflow.Log.Subscribe(fun (e : LogEventArgs) -> printfn "[%d] %s" steps e.Message)
+        Map.iter (fun { Uri = uri; Filename = filename } -> 
+            List.iter (fun ref -> 
+                match !ref with
+                | None -> workflow.Enqueue(uri, filename, fun s -> ref := Some s)
+                | Some _ -> ())) m
 
-            steps <- steps + 1
-            while workflow.Step() do
-                ()
+        steps <- steps + 1
+        while workflow.Step() do
+            ()
+
         f ()
 
     let private succeed x = DownloadState(Map.empty, fun () -> x)
@@ -69,9 +69,12 @@ module Download =
 
         member b.BindUsing(state, f) = bind state (fun r -> using r f)
 
-        member b.Combine(m1, m2) = bind m1 (fun () -> m2)
+        member b.Combine(DownloadState(m1, f1), DownloadState(m2, f2)) =
+            DownloadState(appendWith List.append m1 m2, fun () -> 
+                f1 () 
+                f2 ())
  
-        member b.Delay(f) = delay f
+        member b.Delay(f) = f ()
 
         member b.For (s : #seq<_>, f : ('a -> DownloadState<'b>)) =
             using (s.GetEnumerator()) (fun ie ->
