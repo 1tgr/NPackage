@@ -64,6 +64,9 @@ module Download =
             | Some s -> s
             | None -> raise (new InvalidOperationException("Expected a file name for " + uri.ToString() + ".")))
 
+    let fetch_ uri filename = 
+        DownloadState(Map.add { Uri = uri; Filename = filename } [] Map.empty, fun () -> ())
+
     type DownloadWorkflowBuilder() =
         member b.Bind(state, f) = bind state f
 

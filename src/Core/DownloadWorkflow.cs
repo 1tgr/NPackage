@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using ICSharpCode.SharpZipLib.GZip;
+using ICSharpCode.SharpZipLib.Tar;
+using ICSharpCode.SharpZipLib.Zip;
 using NPackage.Core.Extensions;
 
 namespace NPackage.Core
@@ -92,7 +95,7 @@ namespace NPackage.Core
                             responseUriFilename = Path.GetFileName(response.ResponseUri.GetComponents(UriComponents.Path, UriFormat.Unescaped));
                           
                             string contentDisposition = response.Headers["Content-Disposition"];
-                            if (!string.IsNullOrEmpty(contentDisposition))
+                            if (!String.IsNullOrEmpty(contentDisposition))
                             {
                                 string[] parts = contentDisposition.Split(new[] { ';' }, 2);
                                 if (parts.Length > 1)
@@ -153,7 +156,54 @@ namespace NPackage.Core
         {
             EventHandler<LogEventArgs> handler = Log;
             if (handler != null)
-                handler(this, new LogEventArgs(string.Format(format, args)));
+                handler(this, new LogEventArgs(String.Format(format, args)));
+        }
+
+        private static InvalidOperationException NotFoundInArchive(string archiveFilename, string entryName)
+        {
+            string message = String.Format("There is no {0} in {1}.", entryName, archiveFilename);
+            throw new InvalidOperationException(message);
+        }
+
+        public static void ExtractFile(string archiveFilename, string entryName, string filename)
+        {
+            if (archiveFilename.EndsWith(".zip", StringComparison.InvariantCultureIgnoreCase))
+            {
+                using (ZipFile file = new ZipFile(archiveFilename))
+                {
+                    int index = file.FindEntry(entryName, true);
+                    if (index < 0)
+                        throw NotFoundInArchive(archiveFilename, entryName);
+
+                    using (Stream stream = file.GetInputStream(index))
+                        stream.CopyTo(filename);
+                }
+            }
+            else if (archiveFilename.EndsWith(".tar.gz", StringComparison.InvariantCultureIgnoreCase) ||
+                     archiveFilename.EndsWith(".tgz", StringComparison.InvariantCultureIgnoreCase))
+            {
+                using (Stream fileStream = File.Open(archiveFilename, FileMode.Open, FileAccess.Read))
+                using (Stream gzipStream = new GZipInputStream(fileStream))
+                using (TarInputStream tarStream = new TarInputStream(gzipStream))
+                {
+                    TarEntry entry;
+                    while ((entry = tarStream.GetNextEntry()) != null)
+                    {
+                        if (String.Equals(entry.Name, entryName, StringComparison.InvariantCultureIgnoreCase))
+                        {
+                            using (FileStream outputStream = File.Create(filename))
+                                tarStream.CopyEntryContents(outputStream);
+
+                            break;
+                        }
+                    }
+
+                    if (entry == null)
+                        throw NotFoundInArchive(archiveFilename, entryName);
+                }
+            }
+            else
+                throw new NotSupportedException(archiveFilename + " is not a recognised archive.");
         }
 
         public event EventHandler<LogEventArgs> Log;

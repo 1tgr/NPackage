@@ -1,11 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using ICSharpCode.SharpZipLib.GZip;
-using ICSharpCode.SharpZipLib.Tar;
-using ICSharpCode.SharpZipLib.Zip;
 using Newtonsoft.Json;
-using NPackage.Core.Extensions;
 using Mono.Options;
 
 namespace NPackage.Core
@@ -161,57 +157,10 @@ namespace NPackage.Core
                 Log("Unpacking {0} to {1}", archiveFilename, filename);
 
                 string entryName = uri.Fragment.TrimStart('#');
-                ExtractFile(archiveFilename, entryName, filename);
+                DownloadWorkflow.ExtractFile(archiveFilename, entryName, filename);
 
                 LogSuccess(uri, filename);
             }
-        }
-
-        private static InvalidOperationException NotFoundInArchive(string archiveFilename, string entryName)
-        {
-            string message = String.Format("There is no {0} in {1}.", entryName, archiveFilename);
-            throw new InvalidOperationException(message);
-        }
-
-        private static void ExtractFile(string archiveFilename, string entryName, string filename)
-        {
-            if (archiveFilename.EndsWith(".zip", StringComparison.InvariantCultureIgnoreCase))
-            {
-                using (ZipFile file = new ZipFile(archiveFilename))
-                {
-                    int index = file.FindEntry(entryName, true);
-                    if (index < 0)
-                        throw NotFoundInArchive(archiveFilename, entryName);
-
-                    using (Stream stream = file.GetInputStream(index))
-                        stream.CopyTo(filename);
-                }
-            }
-            else if (archiveFilename.EndsWith(".tar.gz", StringComparison.InvariantCultureIgnoreCase) ||
-                     archiveFilename.EndsWith(".tgz", StringComparison.InvariantCultureIgnoreCase))
-            {
-                using (Stream fileStream = File.Open(archiveFilename, FileMode.Open, FileAccess.Read))
-                using (Stream gzipStream = new GZipInputStream(fileStream))
-                using (TarInputStream tarStream = new TarInputStream(gzipStream))
-                {
-                    TarEntry entry;
-                    while ((entry = tarStream.GetNextEntry()) != null)
-                    {
-                        if (string.Equals(entry.Name, entryName, StringComparison.InvariantCultureIgnoreCase))
-                        {
-                            using (FileStream outputStream = File.Create(filename))
-                                tarStream.CopyEntryContents(outputStream);
-
-                            break;
-                        }
-                    }
-
-                    if (entry == null)
-                        throw NotFoundInArchive(archiveFilename, entryName);
-                }
-            }
-            else
-                throw new NotSupportedException(archiveFilename + " is not a recognised archive.");
         }
 
         private void RunWorkflow()
