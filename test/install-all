@@ -1,15 +1,22 @@
 #!/bin/sh
 testDir=`dirname $0`
-binDir=$testDir/../bin/Debug
-libDir=$testDir/lib
-rm -r $libDir/.dist $libDir/*
-exec mono $binDir/NPackage.exe install \
-    json \
+(
+cd $testDir
+rm -r bin/
+mkdir -p bin
+curl "http://build.partario.com/guestAuth/downloadArtifacts.html?buildTypeId=bt2&buildId=lastSuccessful" > bin/NPackage.zip
+unzip bin/NPackage.zip -d bin/
+rm -r lib/.dist lib/*
+exec mono bin/NPackage.exe fsinstall \
     log4net \
     mono.cecil \
-    mono.options
+    mono.options \
     nhibernate \
     rhino.mocks \
     nunit \
-    quickgraph \
     sharpziplib \
+
+#    json \
+#    quickgraph \
+
+)
