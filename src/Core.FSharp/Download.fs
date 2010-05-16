@@ -2,6 +2,10 @@
 
 open System
 
+type Download<'a> = { Uris : Map<UriKey, List<Ref<Option<String>>>>;
+                      Log : string -> unit;
+                      Action : unit ->'a }
+
 module Download =
     let run { Uris = m; Log = log; Action = f } =
         let workflow = new DownloadWorkflow()
@@ -17,9 +21,11 @@ module Download =
 
         f ()
 
-    let private no_log = fun _ -> ()
+    let private no_log = 
+        fun _ -> ()
 
-    let private succeed x = { Uris = Map.empty; Log = no_log; Action = fun () -> x }
+    let private succeed x = 
+        { Uris = Map.empty; Log = no_log; Action = fun () -> x }
 
     let rec private merge =
         function
