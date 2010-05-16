@@ -36,24 +36,38 @@ type FSInstallCommand() =
 
         let archiveDirectory = archivePath + Path.DirectorySeparatorChar.ToString()
 
+        let downloadPackage uri = Download.workflow {
+            let! packageFilename = Download.fetch uri archiveDirectory
+            use textReader = new StreamReader(packageFilename)
+            use jsonReader = new JsonTextReader(textReader)
+            return serializer.Deserialize<Package>(jsonReader)
+        }
+
+        let registerPackage packages (package : Package) =
+            packages
+            |> Map.add package.Name package
+            |> Map.add (package.Name + "-" + package.Version) package
+
         let rec buildGraph packages uri = Download.workflow {
             let! repositoryFilename = Download.fetch uri archiveDirectory
             use textReader = new StreamReader(repositoryFilename)
             use jsonReader = new JsonTextReader(textReader)
             let repository = serializer.Deserialize<Repository>(jsonReader)
 
-            let! maps = repository.RepositoryImports
-                        |> List.ofSeq
-                        |> List.map (buildGraph packages)
-                        |> Download.batch
+            let! repositoryImports = repository.RepositoryImports
+                                     |> List.ofSeq
+                                     |> List.map (buildGraph packages)
+                                     |> Download.batch
 
-            let packages' = List.fold (MapExtensions.appendWith (fun _ value -> value)) packages maps
-            return repository.Packages
-                    |> List.ofSeq
-                    |> List.fold (fun m package -> 
-                        m
-                        |> Map.add package.Name package
-                        |> Map.add (package.Name + "-" + package.Version) package) packages'
+            let! packageImports = repository.PackageImports
+                                  |> List.ofSeq
+                                  |> List.map downloadPackage
+                                  |> Download.batch
+
+            let packages' = List.fold (MapExtensions.appendWith (fun _ value -> value)) packages repositoryImports
+            return packageImports
+                    |> List.append (List.ofSeq repository.Packages)
+                    |> List.fold registerPackage packages'
         }
 
         let installPackage packages name = 
