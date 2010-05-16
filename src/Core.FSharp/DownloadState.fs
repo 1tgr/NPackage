@@ -2,4 +2,6 @@
 
 open System
 
-type DownloadState<'a> = DownloadState of Map<UriKey, List<Ref<Option<String>>>> * (unit ->'a)
+type DownloadState<'a> = { Uris : Map<UriKey, List<Ref<Option<String>>>>;
+                           Log : string -> unit;
+                           Action : unit ->'a }

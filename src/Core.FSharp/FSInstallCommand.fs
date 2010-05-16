@@ -9,6 +9,8 @@ type FSInstallCommand() =
     inherit CommandBase()
     let mutable repositoryUri = new Uri("http://np.partario.com/packages.js")
     let serializer = new JsonSerializer()
+    let success = printfn "\r ***    Installed %s"
+    let log = printfn "    --> %s"
 
     override this.CreateOptionSet() =
         base.CreateOptionSet()
@@ -60,37 +62,46 @@ type FSInstallCommand() =
                 let packagePath = Path.Combine(Path.Combine(libPath, package.Name), package.Version)
                 ignore (Directory.CreateDirectory(packagePath))
 
-                let downloadLibrary name (library : Library) =
+                let downloadLibrary name (library : Library) = Download.workflow {
                     let libraryFilename = Path.Combine(packagePath, name)
                     let uri = new Uri(new Uri(package.MasterSites.[0]), library.Binary)
+
                     let builder = new UriBuilder(uri)
                     if builder.Fragment.Length > 0 then
-                        Download.workflow {
-                            let fragment = builder.Fragment.TrimStart('#')
-                            builder.Fragment <- String.Empty
-                            let! archiveFilename = Download.fetch builder.Uri archiveDirectory
-                            DownloadWorkflow.ExtractFile(archiveFilename, fragment, libraryFilename)
-                            printfn "Installed %A to %s" uri libraryFilename
-                        }
-                    else
-                        Download.workflow {
-                            do! Download.fetch_ uri libraryFilename
-                            printfn "Installed %A to %s" uri libraryFilename
-                        }
+                        let fragment = builder.Fragment.TrimStart('#')
+                        builder.Fragment <- String.Empty
+                        let! archiveFilename = Download.fetch builder.Uri archiveDirectory
+                        let archiveFileInfo = new FileInfo(archiveFilename)
+                        let libraryFileInfo = new FileInfo(libraryFilename)
 
-                package.Libraries
-                |> List.ofSeq
-                |> List.map (fun pair -> downloadLibrary pair.Key pair.Value)
-                |> Download.batch_
+                        if (not libraryFileInfo.Exists) || (archiveFileInfo.LastWriteTime > libraryFileInfo.LastWriteTime) then
+                            log ("Unpacking " + archiveFilename + "#" + fragment)
+                            DownloadWorkflow.ExtractFile(archiveFilename, fragment, libraryFilename)
+                            success libraryFilename
+                    else
+                        do! Download.fetch_ uri libraryFilename
+                        success libraryFilename
+                }
+
+                Download.workflow {
+                    do! package.Libraries
+                        |> List.ofSeq
+                        |> List.map (fun pair -> downloadLibrary pair.Key pair.Value)
+                        |> Download.batch_
+
+                    return 0
+                }
             | None -> raise (new InvalidOperationException("There is no package called " + name + "."))
 
-        let packages = Download.run (buildGraph Map.empty repositoryUri)
-        this.PackageNames
-        |> List.ofSeq
-        |> List.map (installPackage packages)
-        |> Download.batch_
+        let packages = { buildGraph Map.empty repositoryUri with Log = log }
+                       |> Download.run
+
+        { (this.PackageNames
+           |> List.ofSeq
+           |> List.map (installPackage packages)
+           |> Download.batch) with Log = log }
         |> Download.run
-        0
+        |> List.max
 
     member this.RepositoryUri
         with get() = repositoryUri
