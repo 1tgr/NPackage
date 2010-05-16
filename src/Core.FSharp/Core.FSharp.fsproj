@@ -49,6 +49,7 @@
     <Reference Include="mscorlib" />
     <Reference Include="FSharp.Core">
       <HintPath>..\..\lib\fsharp.core\2.0.0.0\FSharp.Core.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\..\lib\json\7\Newtonsoft.Json.dll</HintPath>
