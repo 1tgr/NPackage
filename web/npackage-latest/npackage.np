@@ -1,0 +1,46 @@
+{
+  "Name": "npackage",
+  "Version": "latest",
+  "Description": "Packaging and distribution system for .NET",
+  "Author": "Tim Robinson",
+  "Maintainer": "tim.g.robinson@gmail.com",
+  "MasterSites": [ "http://build.partario.com/guestAuth/" ],
+  "Libraries": {
+    "FSharp.Core.dll": {
+      "Binary": "downloadArtifacts.html?buildTypeId=bt2&buildId=lastSuccessful#FSharp.Core.dll"
+    },
+    "ICSharpCode.SharpZipLib.dll": {
+      "Binary": "downloadArtifacts.html?buildTypeId=bt2&buildId=lastSuccessful#ICSharpCode.SharpZipLib.dll"
+    },
+    "Mono.Options.dll": {
+      "Binary": "downloadArtifacts.html?buildTypeId=bt2&buildId=lastSuccessful#Mono.Options.dll"
+    },
+    "Newtonsoft.Json.dll": {
+      "Binary": "downloadArtifacts.html?buildTypeId=bt2&buildId=lastSuccessful#Newtonsoft.Json.dll"
+    },
+    "NPackage.Core.dll": {
+      "Binary": "downloadArtifacts.html?buildTypeId=bt2&buildId=lastSuccessful#NPackage.Core.dll"
+    },
+    "NPackage.Core.pdb": {
+      "Binary": "downloadArtifacts.html?buildTypeId=bt2&buildId=lastSuccessful#NPackage.Core.pdb"
+    },
+    "NPackage.Core.FSharp.dll": {
+      "Binary": "downloadArtifacts.html?buildTypeId=bt2&buildId=lastSuccessful#NPackage.Core.FSharp.dll"
+    },
+    "NPackage.Core.FSharp.pdb": {
+      "Binary": "downloadArtifacts.html?buildTypeId=bt2&buildId=lastSuccessful#NPackage.Core.FSharp.pdb"
+    },
+    "NPackage.Core.dll": {
+      "Binary": "downloadArtifacts.html?buildTypeId=bt2&buildId=lastSuccessful#NPackage.Core.dll"
+    },
+    "NPackage.Core.pdb": {
+      "Binary": "downloadArtifacts.html?buildTypeId=bt2&buildId=lastSuccessful#NPackage.Core.pdb"
+    },
+    "NPackage.exe": {
+      "Binary": "downloadArtifacts.html?buildTypeId=bt2&buildId=lastSuccessful#NPackage.exe"
+    },
+    "NPackage.pdb": {
+      "Binary": "downloadArtifacts.html?buildTypeId=bt2&buildId=lastSuccessful#NPackage.pdb"
+    },
+  }
+}
