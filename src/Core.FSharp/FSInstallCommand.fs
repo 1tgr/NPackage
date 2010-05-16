@@ -8,13 +8,14 @@ open Newtonsoft.Json
 type FSInstallCommand() =
     inherit CommandBase()
     let mutable repositoryUri = new Uri("http://np.partario.com/packages.js")
+    let baseUri = new Uri(Environment.CurrentDirectory + Path.DirectorySeparatorChar.ToString())
     let serializer = new JsonSerializer()
     let success = printfn "\r ***    Installed %s"
     let log = printfn "    --> %s"
 
     override this.CreateOptionSet() =
         base.CreateOptionSet()
-            .Add("r|repository", "URL of the packages.js file", fun (v : Uri) -> this.RepositoryUri <- v)
+            .Add("r|repository=", "URL of the packages.js file", fun (v : string) -> this.RepositoryUri <- new Uri(baseUri, v))
 
     override this.RunCore() =
         let libPath = 
@@ -56,12 +57,12 @@ type FSInstallCommand() =
 
             let! repositoryImports = repository.RepositoryImports
                                      |> List.ofSeq
-                                     |> List.map (buildGraph packages)
+                                     |> List.map (fun relativeUri -> buildGraph packages (new Uri(uri, relativeUri)))
                                      |> Download.batch
 
             let! packageImports = repository.PackageImports
                                   |> List.ofSeq
-                                  |> List.map downloadPackage
+                                  |> List.map (fun relativeUri -> downloadPackage (new Uri(uri, relativeUri)))
                                   |> Download.batch
 
             let packages' = List.fold (MapExtensions.appendWith (fun _ value -> value)) packages repositoryImports

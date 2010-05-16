@@ -37,7 +37,6 @@
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <ItemGroup>
     <Compile Include="UriKey.fs" />
-    <Compile Include="DownloadState.fs" />
     <Compile Include="MapExtensions.fs" />
     <Compile Include="Download.fs" />
     <Compile Include="FSInstallCommand.fs" />

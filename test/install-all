@@ -7,7 +7,7 @@ mkdir -p bin
 curl "http://build.partario.com/guestAuth/downloadArtifacts.html?buildTypeId=bt2&buildId=lastSuccessful" > bin/NPackage.zip
 unzip bin/NPackage.zip -d bin/
 rm -r lib/.dist lib/*
-exec mono bin/NPackage.exe fsinstall \
+exec mono bin/NPackage.exe fsinstall --repository=../web/packages.js \
     log4net \
     mono.cecil \
     mono.options \
