@@ -90,6 +90,10 @@ namespace NPackage.Core
                         RaiseLog("Checking {0}", uriPair.Uri);
 
                         WebRequest request = WebRequest.Create(uriPair.Uri);
+
+                        if (request is HttpWebRequest)
+                            request.UseDefaultCredentials = true;
+
                         using (WebResponse response = request.GetResponse())
                         {
                             responseUriFilename = Path.GetFileName(response.ResponseUri.GetComponents(UriComponents.Path, UriFormat.Unescaped));
