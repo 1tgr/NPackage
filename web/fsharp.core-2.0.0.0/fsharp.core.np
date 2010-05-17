@@ -1,0 +1,21 @@
+{
+  "Name": "fsharp.core",
+  "Version": "2.0.0.0",
+  "Description": "F# redistributable",
+  "Author": "Microsoft",
+  "Maintainer": "tim.g.robinson@gmail.com",
+  "Libraries": {
+    "FSharp.Core.dll": {
+      "Binary": "FSharp.Core.zip#FSharp.Core.dll"
+    },
+    "FSharp.Core.optdata": {
+      "Binary": "FSharp.Core.zip#FSharp.Core.optdata"
+    },
+    "FSharp.Core.sigdata": {
+      "Binary": "FSharp.Core.zip#FSharp.Core.sigdata"
+    },
+    "FSharp.Core.xml": {
+      "Binary": "FSharp.Core.zip#FSharp.Core.xml"
+    }
+  }
+}

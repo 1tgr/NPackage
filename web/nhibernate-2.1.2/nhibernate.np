@@ -5,6 +5,7 @@
   "Author": "Ayende Rahien",
   "Maintainer": "tim.g.robinson@gmail.com",
   "MasterSites": [ "http://downloads.sourceforge.net/project/nhibernate/NHibernate/2.1.2GA/" ],
+  "Requires": [ "log4net" ],
   "Libraries": {
     "NHibernate.dll": {
       "Binary": "NHibernate-2.1.2.GA-bin.zip#Required_Bins/NHibernate.dll"
