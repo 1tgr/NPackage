@@ -12,7 +12,6 @@ namespace NPackage.Console
             {
                 { "help", delegate { return CreateHelpCommand(); } },
                 { "install", delegate { return new InstallCommand(); } },
-                { "fsinstall", delegate { return new FSInstallCommand(); } },
             };
 
         private static HelpCommand CreateHelpCommand()

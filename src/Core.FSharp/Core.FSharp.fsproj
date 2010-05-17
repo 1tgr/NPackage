@@ -39,7 +39,7 @@
     <Compile Include="UriKey.fs" />
     <Compile Include="MapExtensions.fs" />
     <Compile Include="Download.fs" />
-    <Compile Include="FSInstallCommand.fs" />
+    <Compile Include="InstallCommand.fs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="Mono.Options">
