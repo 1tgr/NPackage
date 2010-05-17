@@ -116,7 +116,7 @@ type FSInstallCommand() =
                                      |> List.ofSeq
                                      |> List.collect (buildGraph packages)
                                      |> List.filter (fun p -> p <> package)
-                package :: dependentOrder
+                List.append dependentOrder [package]
 
             | None -> raise (new InvalidOperationException("There is no package called " + name + "."))
 
