@@ -1,5 +1,26 @@
 { "Packages": [
 {
+  "Name": "fsharp.core",
+  "Version": "2.0.0.0",
+  "Description": "F# redistributable",
+  "Author": "Microsoft",
+  "Maintainer": "tim.g.robinson@gmail.com",
+  "Libraries": {
+    "FSharp.Core.dll": {
+      "Binary": "FSharp.Core.zip#FSharp.Core.dll"
+    },
+    "FSharp.Core.optdata": {
+      "Binary": "FSharp.Core.zip#FSharp.Core.optdata"
+    },
+    "FSharp.Core.sigdata": {
+      "Binary": "FSharp.Core.zip#FSharp.Core.sigdata"
+    },
+    "FSharp.Core.xml": {
+      "Binary": "FSharp.Core.zip#FSharp.Core.xml"
+    }
+  }
+},
+{
   "Name": "json",
   "Version": "7",
   "Description": "Makes working with JSON formatted data in .NET simple",
@@ -70,6 +91,7 @@
   "Author": "Ayende Rahien",
   "Maintainer": "tim.g.robinson@gmail.com",
   "MasterSites": [ "http://downloads.sourceforge.net/project/nhibernate/NHibernate/2.1.2GA/" ],
+  "Requires": [ "log4net" ],
   "Libraries": {
     "NHibernate.dll": {
       "Binary": "NHibernate-2.1.2.GA-bin.zip#Required_Bins/NHibernate.dll"
@@ -86,7 +108,7 @@
   "Author": "Tim Robinson",
   "Maintainer": "tim.g.robinson@gmail.com",
   "MasterSites": [ "http://build.partario.com/guestAuth/" ],
-  "Requires": [ "sharpziplib", "mono.options" ],
+  "Requires": [ "fsharp.core", "sharpziplib", "mono.options" ],
   "Libraries": {
     "FSharp.Core.dll": {
       "Binary": "downloadArtifacts.html?buildTypeId=bt2&buildId=lastSuccessful#FSharp.Core.dll"
