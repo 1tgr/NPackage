@@ -86,6 +86,7 @@
   "Author": "Tim Robinson",
   "Maintainer": "tim.g.robinson@gmail.com",
   "MasterSites": [ "http://build.partario.com/guestAuth/" ],
+  "Requires": [ "sharpziplib", "mono.options" ],
   "Libraries": {
     "FSharp.Core.dll": {
       "Binary": "downloadArtifacts.html?buildTypeId=bt2&buildId=lastSuccessful#FSharp.Core.dll"
