@@ -7,19 +7,20 @@
   "Maintainer": "tim.g.robinson@gmail.com",
   "Libraries": {
     "FSharp.Core.dll": {
-      "Binary": "FSharp.Core.zip#FSharp.Core.dll"
+      "Binary": "fsharp.core-2.0.0.0/FSharp.Core.zip#FSharp.Core.dll"
     },
     "FSharp.Core.optdata": {
-      "Binary": "FSharp.Core.zip#FSharp.Core.optdata"
+      "Binary": "fsharp.core-2.0.0.0/FSharp.Core.zip#FSharp.Core.optdata"
     },
     "FSharp.Core.sigdata": {
-      "Binary": "FSharp.Core.zip#FSharp.Core.sigdata"
+      "Binary": "fsharp.core-2.0.0.0/FSharp.Core.zip#FSharp.Core.sigdata"
     },
     "FSharp.Core.xml": {
-      "Binary": "FSharp.Core.zip#FSharp.Core.xml"
+      "Binary": "fsharp.core-2.0.0.0/FSharp.Core.zip#FSharp.Core.xml"
     }
   }
-},
+}
+,
 {
   "Name": "json",
   "Version": "7",
