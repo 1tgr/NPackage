@@ -5,7 +5,7 @@ open System.Collections.Generic
 open System.IO
 open Newtonsoft.Json
 
-type FSInstallCommand() =
+type InstallCommand() =
     inherit CommandBase()
     let mutable repositoryUri = new Uri("http://np.partario.com/packages.js")
     let mutable preview = false
@@ -45,7 +45,12 @@ type FSInstallCommand() =
             let! packageFilename = Download.fetch uri archiveDirectory
             use textReader = new StreamReader(packageFilename)
             use jsonReader = new JsonTextReader(textReader)
-            return serializer.Deserialize<Package>(jsonReader)
+            let package = serializer.Deserialize<Package>(jsonReader)
+
+            if package.MasterSites.Count = 0 then
+                package.MasterSites.Add(uri.GetLeftPart(UriPartial.Path))
+
+            return package
         }
 
         let registerPackage packages (package : Package) =
@@ -58,6 +63,10 @@ type FSInstallCommand() =
             use textReader = new StreamReader(repositoryFilename)
             use jsonReader = new JsonTextReader(textReader)
             let repository = serializer.Deserialize<Repository>(jsonReader)
+
+            for package in repository.Packages do
+                if package.MasterSites.Count = 0 then
+                    package.MasterSites.Add(uri.GetLeftPart(UriPartial.Path))
 
             let! repositoryImports = repository.RepositoryImports
                                      |> List.ofSeq
