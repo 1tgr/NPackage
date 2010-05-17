@@ -5,7 +5,8 @@ namespace NPackage.Core
     public class Package
     {
         private readonly List<string> masterSites = new List<string>();
-        private readonly Dictionary<string, Library> library = new Dictionary<string, Library>();
+        private readonly List<string> requires = new List<string>();
+        private readonly Dictionary<string, Library> libraries = new Dictionary<string, Library>();
 
         public string Name { get; set; }
         public string Version { get; set; }
@@ -18,9 +19,14 @@ namespace NPackage.Core
             get { return masterSites; }
         }
 
+        public IList<string> Requires
+        {
+            get { return requires; }
+        }
+
         public IDictionary<string, Library> Libraries
         {
-            get { return library; }
+            get { return libraries; }
         }
     }
 }

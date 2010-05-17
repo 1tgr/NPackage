@@ -8,6 +8,7 @@ open Newtonsoft.Json
 type FSInstallCommand() =
     inherit CommandBase()
     let mutable repositoryUri = new Uri("http://np.partario.com/packages.js")
+    let mutable preview = false
     let baseUri = new Uri(Environment.CurrentDirectory + Path.DirectorySeparatorChar.ToString())
     let serializer = new JsonSerializer()
     let success = printfn "\r ***    Installed %s"
@@ -15,6 +16,9 @@ type FSInstallCommand() =
 
     override this.CreateOptionSet() =
         base.CreateOptionSet()
+            .Add("p|preview", "Only show what packages would be installed; don't install them", function
+                                                                                                | null -> preview <- false
+                                                                                                | _ -> preview <- true)
             .Add("r|repository=", "URL of the packages.js file", fun (v : string) -> this.RepositoryUri <- new Uri(baseUri, v))
 
     override this.RunCore() =
@@ -49,7 +53,7 @@ type FSInstallCommand() =
             |> Map.add package.Name package
             |> Map.add (package.Name + "-" + package.Version) package
 
-        let rec buildGraph packages uri = Download.workflow {
+        let rec downloadPackages packages uri = Download.workflow {
             let! repositoryFilename = Download.fetch uri archiveDirectory
             use textReader = new StreamReader(repositoryFilename)
             use jsonReader = new JsonTextReader(textReader)
@@ -57,7 +61,7 @@ type FSInstallCommand() =
 
             let! repositoryImports = repository.RepositoryImports
                                      |> List.ofSeq
-                                     |> List.map (fun relativeUri -> buildGraph packages (new Uri(uri, relativeUri)))
+                                     |> List.map (fun relativeUri -> downloadPackages packages (new Uri(uri, relativeUri)))
                                      |> Download.batch
 
             let! packageImports = repository.PackageImports
@@ -71,52 +75,67 @@ type FSInstallCommand() =
                     |> List.fold registerPackage packages'
         }
 
-        let installPackage packages name = 
-            match Map.tryFind name packages with
-            | Some (package : Package) ->
-                let packagePath = Path.Combine(Path.Combine(libPath, package.Name), package.Version)
-                ignore (Directory.CreateDirectory(packagePath))
+        let installPackage (package : Package) = 
+            let packagePath = Path.Combine(Path.Combine(libPath, package.Name), package.Version)
 
-                let downloadLibrary name (library : Library) = Download.workflow {
-                    let libraryFilename = Path.Combine(packagePath, name)
-                    let uri = new Uri(new Uri(package.MasterSites.[0]), library.Binary)
+            let downloadLibrary name (library : Library) = Download.workflow {
+                let libraryFilename = Path.Combine(packagePath, name)
+                let uri = new Uri(new Uri(package.MasterSites.[0]), library.Binary)
 
-                    let builder = new UriBuilder(uri)
-                    if builder.Fragment.Length > 0 then
-                        let fragment = builder.Fragment.TrimStart('#')
-                        builder.Fragment <- String.Empty
-                        let! archiveFilename = Download.fetch builder.Uri archiveDirectory
-                        let archiveFileInfo = new FileInfo(archiveFilename)
-                        let libraryFileInfo = new FileInfo(libraryFilename)
+                let builder = new UriBuilder(uri)
+                if builder.Fragment.Length > 0 then
+                    let fragment = builder.Fragment.TrimStart('#')
+                    builder.Fragment <- String.Empty
+                    let! archiveFilename = Download.fetch builder.Uri archiveDirectory
+                    let archiveFileInfo = new FileInfo(archiveFilename)
+                    let libraryFileInfo = new FileInfo(libraryFilename)
 
-                        if (not libraryFileInfo.Exists) || (archiveFileInfo.LastWriteTime > libraryFileInfo.LastWriteTime) then
-                            log ("Unpacking " + archiveFilename + "#" + fragment)
-                            DownloadWorkflow.ExtractFile(archiveFilename, fragment, libraryFilename)
-                            success libraryFilename
-                    else
-                        do! Download.fetch_ uri libraryFilename
+                    if (not libraryFileInfo.Exists) || (archiveFileInfo.LastWriteTime > libraryFileInfo.LastWriteTime) then
+                        log ("Unpacking " + archiveFilename + "#" + fragment)
+                        DownloadWorkflow.ExtractFile(archiveFilename, fragment, libraryFilename)
                         success libraryFilename
-                }
+                else
+                    do! Download.fetch_ uri libraryFilename
+                    success libraryFilename
+            }
 
-                Download.workflow {
-                    do! package.Libraries
-                        |> List.ofSeq
-                        |> List.map (fun pair -> downloadLibrary pair.Key pair.Value)
-                        |> Download.batch_
+            ignore (Directory.CreateDirectory(packagePath))
+            Download.workflow {
+                do! package.Libraries
+                    |> List.ofSeq
+                    |> List.map (fun pair -> downloadLibrary pair.Key pair.Value)
+                    |> Download.batch_
 
-                    return 0
-                }
+                return 0
+            }
+
+        let rec buildGraph packages name =
+            match Map.tryFind name packages with
+            | Some (package : Package) -> 
+                let dependentOrder = package.Requires
+                                     |> List.ofSeq
+                                     |> List.collect (buildGraph packages)
+                                     |> List.filter (fun p -> p <> package)
+                package :: dependentOrder
+
             | None -> raise (new InvalidOperationException("There is no package called " + name + "."))
 
-        let packages = { buildGraph Map.empty repositoryUri with Log = log }
-                       |> Download.run
+        let packages = Download.run { downloadPackages Map.empty repositoryUri with Log = log }
+        let installOrder = this.PackageNames
+                           |> List.ofSeq
+                           |> List.collect (buildGraph packages)
 
-        { (this.PackageNames
-           |> List.ofSeq
-           |> List.map (installPackage packages)
-           |> Download.batch) with Log = log }
-        |> Download.run
-        |> List.max
+        if preview then
+            printfn "The following packages would be installed:\n"
+            installOrder
+            |> List.iter (fun p -> printfn "\t%s version %s" p.Name p.Version)
+            0
+        else
+            { (installOrder
+               |> List.map installPackage
+               |> Download.batch) with Log = log }
+            |> Download.run
+            |> List.max
 
     member this.RepositoryUri
         with get() = repositoryUri
@@ -124,3 +143,7 @@ type FSInstallCommand() =
 
     member this.PackageNames
         with get() = base.ExtraArguments
+
+    member this.Preview
+        with get() = preview
+        and set(value) = preview <- value
