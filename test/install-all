@@ -7,12 +7,13 @@ mkdir -p bin
 curl "http://build.partario.com/guestAuth/downloadArtifacts.html?buildTypeId=bt2&buildId=lastSuccessful" > bin/NPackage.zip
 unzip bin/NPackage.zip -d bin/
 rm -r lib/.dist lib/*
-exec mono bin/NPackage.exe install --repository=../web/packages.js \
+exec mono bin/NPackage.exe install \
     fsharp.core \
     log4net \
     mono.cecil \
     mono.options \
     nhibernate \
+    npackage \
     rhino.mocks \
     nunit \
     sharpziplib \

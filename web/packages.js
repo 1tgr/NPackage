@@ -201,6 +201,19 @@
   }
 },
 {
+  "Name": "ravendb",
+  "Version": "latest",
+  "Description": "Document database for the .NET/Windows platform",
+  "Author": "Ayende Rahien",
+  "Maintainer": "tim.g.robinson@gmail.com",
+  "MasterSites": [ "http://builds.hibernatingrhinos.com/downloadlatest/" ],
+  "Libraries": {
+    "Raven.Client-3.5.dll": {
+      "Binary": "ravendb#Client-3.5/Raven.Client-3.5.dll"
+    },
+  }
+},
+{
   "Name": "rhino.mocks",
   "Version": "3.6",
   "Description": "Dynamic mock object framework for the .Net platform",
