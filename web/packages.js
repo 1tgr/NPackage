@@ -202,14 +202,14 @@
 },
 {
   "Name": "ravendb",
-  "Version": "latest",
+  "Version": "0.63",
   "Description": "Document database for the .NET/Windows platform",
   "Author": "Ayende Rahien",
   "Maintainer": "tim.g.robinson@gmail.com",
-  "MasterSites": [ "http://builds.hibernatingrhinos.com/downloadlatest/" ],
+  "MasterSites": [ "http://s3.amazonaws.com/daily-builds/" ],
   "Libraries": {
     "Raven.Client-3.5.dll": {
-      "Binary": "ravendb#Client-3.5/Raven.Client-3.5.dll"
+      "Binary": "Raven-Build-63.zip#Client-3.5/Raven.Client-3.5.dll"
     },
   }
 },
