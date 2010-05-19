@@ -5,18 +5,19 @@
   "Description": "F# redistributable",
   "Author": "Microsoft",
   "Maintainer": "tim.g.robinson@gmail.com",
+  "MasterSites": [ "fsharp.core-2.0.0.0/" ],
   "Libraries": {
     "FSharp.Core.dll": {
-      "Binary": "fsharp.core-2.0.0.0/FSharp.Core.zip#FSharp.Core.dll"
+      "Binary": "FSharp.Core.zip#FSharp.Core.dll"
     },
     "FSharp.Core.optdata": {
-      "Binary": "fsharp.core-2.0.0.0/FSharp.Core.zip#FSharp.Core.optdata"
+      "Binary": "FSharp.Core.zip#FSharp.Core.optdata"
     },
     "FSharp.Core.sigdata": {
-      "Binary": "fsharp.core-2.0.0.0/FSharp.Core.zip#FSharp.Core.sigdata"
+      "Binary": "FSharp.Core.zip#FSharp.Core.sigdata"
     },
     "FSharp.Core.xml": {
-      "Binary": "fsharp.core-2.0.0.0/FSharp.Core.zip#FSharp.Core.xml"
+      "Binary": "FSharp.Core.zip#FSharp.Core.xml"
     }
   }
 }
@@ -111,19 +112,15 @@
   "Maintainer": "tim.g.robinson@gmail.com",
   "MasterSites": [ "http://build.partario.com/guestAuth/" ],
   "Requires": [ "fsharp.core", "sharpziplib", "mono.options" ],
+  "Executables": {
+    "NPackage.exe": {
+      "Binary": "downloadArtifacts.html?buildTypeId=bt2&buildId=lastSuccessful#NPackage.exe"
+    },
+    "NPackage.pdb": {
+      "Binary": "downloadArtifacts.html?buildTypeId=bt2&buildId=lastSuccessful#NPackage.pdb"
+    },
+  },
   "Libraries": {
-    "FSharp.Core.dll": {
-      "Binary": "downloadArtifacts.html?buildTypeId=bt2&buildId=lastSuccessful#FSharp.Core.dll"
-    },
-    "ICSharpCode.SharpZipLib.dll": {
-      "Binary": "downloadArtifacts.html?buildTypeId=bt2&buildId=lastSuccessful#ICSharpCode.SharpZipLib.dll"
-    },
-    "Mono.Options.dll": {
-      "Binary": "downloadArtifacts.html?buildTypeId=bt2&buildId=lastSuccessful#Mono.Options.dll"
-    },
-    "Newtonsoft.Json.dll": {
-      "Binary": "downloadArtifacts.html?buildTypeId=bt2&buildId=lastSuccessful#Newtonsoft.Json.dll"
-    },
     "NPackage.Core.dll": {
       "Binary": "downloadArtifacts.html?buildTypeId=bt2&buildId=lastSuccessful#NPackage.Core.dll"
     },
@@ -141,12 +138,6 @@
     },
     "NPackage.Core.pdb": {
       "Binary": "downloadArtifacts.html?buildTypeId=bt2&buildId=lastSuccessful#NPackage.Core.pdb"
-    },
-    "NPackage.exe": {
-      "Binary": "downloadArtifacts.html?buildTypeId=bt2&buildId=lastSuccessful#NPackage.exe"
-    },
-    "NPackage.pdb": {
-      "Binary": "downloadArtifacts.html?buildTypeId=bt2&buildId=lastSuccessful#NPackage.pdb"
     },
   }
 }
