@@ -27,7 +27,7 @@
   "Description": "Makes working with JSON formatted data in .NET simple",
   "Author": "James Newton-King",
   "Maintainer": "tim.g.robinson@gmail.com",
-  "MasterSites": [ "./json-7/" ],
+  "MasterSites": [ "json-7/" ],
   "Libraries": {
     "Newtonsoft.Json.dll": {
       "Binary": "Json35r7.zip#Bin/DotNet/Newtonsoft.Json.dll"

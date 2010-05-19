@@ -89,7 +89,7 @@ type InstallCommand() =
 
             let downloadLibrary name (library : Library) = Download.workflow {
                 let libraryFilename = Path.Combine(packagePath, name)
-                let uri = new Uri(new Uri(package.MasterSites.[0]), library.Binary)
+                let uri = new Uri(new Uri(repositoryUri, package.MasterSites.[0]), library.Binary)
 
                 let builder = new UriBuilder(uri)
                 if builder.Fragment.Length > 0 then
