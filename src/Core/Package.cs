@@ -13,6 +13,7 @@ namespace NPackage.Core
         public string Description { get; set; }
         public string Author { get; set; }
         public string Maintainer { get; set; }
+        public bool CopyLocal { get; set; }
 
         public IList<string> MasterSites
         {

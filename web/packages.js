@@ -111,6 +111,7 @@
   "Maintainer": "tim.g.robinson@gmail.com",
   "MasterSites": [ "http://build.partario.com/guestAuth/" ],
   "Requires": [ "fsharp.core", "sharpziplib", "mono.options" ],
+  "CopyLocal": true,
   "Libraries": {
     "FSharp.Core.dll": {
       "Binary": "downloadArtifacts.html?buildTypeId=bt2&buildId=lastSuccessful#FSharp.Core.dll"
