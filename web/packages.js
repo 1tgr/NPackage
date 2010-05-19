@@ -27,19 +27,20 @@
   "Description": "Makes working with JSON formatted data in .NET simple",
   "Author": "James Newton-King",
   "Maintainer": "tim.g.robinson@gmail.com",
-  "MasterSites": [ "http://download.codeplex.com/Project/Download/" ],
+  "MasterSites": [ "./json-7/" ],
   "Libraries": {
     "Newtonsoft.Json.dll": {
-      "Binary": "FileDownload.aspx?ProjectName=Json&DownloadId=117351&FileTime=129162242226600000&Build=16504#Bin/DotNet/Newtonsoft.Json.dll"
+      "Binary": "Json35r7.zip#Bin/DotNet/Newtonsoft.Json.dll"
     },
     "Newtonsoft.Json.pdb": {
-      "Binary": "FileDownload.aspx?ProjectName=Json&DownloadId=117351&FileTime=129162242226600000&Build=16504#Bin/DotNet/Newtonsoft.Json.pdb"
+      "Binary": "Json35r7.zip#Bin/DotNet/Newtonsoft.Json.pdb"
     },
     "Newtonsoft.Json.xml": {
-      "Binary": "FileDownload.aspx?ProjectName=Json&DownloadId=117351&FileTime=129162242226600000&Build=16504#Bin/DotNet/Newtonsoft.Json.xml"
+      "Binary": "Json35r7.zip#Bin/DotNet/Newtonsoft.Json.xml"
     }
   }
-},
+}
+,
 {
   "Name": "log4net",
   "Version": "1.2.10",

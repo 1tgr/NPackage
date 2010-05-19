@@ -1,4 +1,7 @@
 #!/bin/sh
 scriptsDir=`dirname $0`
-binDir=$scriptsDir/../Bin/Debug
+binDir=$scriptsDir/bin
+mkdir -p $binDir
+curl "http://build.partario.com/guestAuth/downloadArtifacts.html?buildTypeId=bt2&buildId=lastSuccessful" > $binDir/NPackage.zip
+unzip bin/NPackage.zip -d $binDir/
 exec mono $binDir/NPackage.exe install json mono.options nunit sharpziplib
