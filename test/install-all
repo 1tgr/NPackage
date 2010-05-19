@@ -14,7 +14,8 @@ exec mono bin/NPackage.exe install \
     mono.options \
     nhibernate \
     npackage \
-    ravendb \
+    ravendb.client \
+    ravendb.server \
     rhino.mocks \
     nunit \
     sharpziplib \

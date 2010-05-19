@@ -1,5 +1,5 @@
 {
-  "Name": "ravendb",
+  "Name": "ravendb.client",
   "Version": "0.63",
   "Description": "Document database for the .NET/Windows platform",
   "Author": "Ayende Rahien",

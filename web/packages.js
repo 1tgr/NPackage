@@ -201,7 +201,7 @@
   }
 },
 {
-  "Name": "ravendb",
+  "Name": "ravendb.client",
   "Version": "0.63",
   "Description": "Document database for the .NET/Windows platform",
   "Author": "Ayende Rahien",
@@ -210,6 +210,22 @@
   "Libraries": {
     "Raven.Client-3.5.dll": {
       "Binary": "Raven-Build-63.zip#Client-3.5/Raven.Client-3.5.dll"
+    },
+  }
+},
+{
+  "Name": "ravendb.server",
+  "Version": "0.63",
+  "Description": "Document database for the .NET/Windows platform",
+  "Author": "Ayende Rahien",
+  "Maintainer": "tim.g.robinson@gmail.com",
+  "MasterSites": [ "http://s3.amazonaws.com/daily-builds/" ],
+  "Libraries": {
+    "RavenDb.exe": {
+      "Binary": "Raven-Build-63.zip#Server/RavenDb.exe"
+    },
+    "RavenDb.exe.config": {
+      "Binary": "Raven-Build-63.zip#Server/RavenDb.exe.config"
     },
   }
 },
