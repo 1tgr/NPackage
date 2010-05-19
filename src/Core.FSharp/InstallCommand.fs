@@ -84,9 +84,18 @@ type InstallCommand() =
                     |> List.fold registerPackage packages'
         }
 
-        let installPackage (package : Package) = 
-            let packagePath = Path.Combine(Path.Combine(libPath, package.Name), package.Version)
+        let rec buildGraphByName packages name =
+            match Map.tryFind name packages with
+            | Some (package : Package) -> buildGraph packages package
+            | None -> raise (new InvalidOperationException("There is no package called " + name + "."))
+        and buildGraph packages package =
+            let dependentOrder = package.Requires
+                                 |> List.ofSeq
+                                 |> List.collect (buildGraphByName packages)
+                                 |> List.filter (fun p -> p <> package)
+            List.append dependentOrder [package]
 
+        let rec installPackageToPath packages packagePath (package : Package) = 
             let downloadLibrary name (library : Library) = Download.workflow {
                 let libraryFilename = Path.Combine(packagePath, name)
                 let uri = new Uri(new Uri(repositoryUri, package.MasterSites.[0]), library.Binary)
@@ -106,33 +115,37 @@ type InstallCommand() =
                 else
                     do! Download.fetch_ uri libraryFilename
                     success libraryFilename
-            }
-
-            ignore (Directory.CreateDirectory(packagePath))
-            Download.workflow {
-                do! package.Libraries
-                    |> List.ofSeq
-                    |> List.map (fun pair -> downloadLibrary pair.Key pair.Value)
-                    |> Download.batch_
 
                 return 0
             }
 
-        let rec buildGraph packages name =
-            match Map.tryFind name packages with
-            | Some (package : Package) -> 
-                let dependentOrder = package.Requires
-                                     |> List.ofSeq
-                                     |> List.collect (buildGraph packages)
-                                     |> List.filter (fun p -> p <> package)
-                List.append dependentOrder [package]
+            let copyLocal =
+                if package.CopyLocal then
+                    buildGraph packages package
+                    |> List.filter (fun p -> p <> package)
+                    |> List.map (installPackageToPath packages packagePath)
+                else
+                    [Download.workflow { return 0 }]
 
-            | None -> raise (new InvalidOperationException("There is no package called " + name + "."))
+            Download.workflow {
+                let! codes = package.Libraries
+                            |> List.ofSeq
+                            |> List.map (fun pair -> downloadLibrary pair.Key pair.Value)
+                            |> List.append copyLocal
+                            |> Download.batch
+
+                return List.max codes
+            }
+
+        let installPackage packages (package : Package) =
+            let packagePath = Path.Combine(Path.Combine(libPath, package.Name), package.Version)
+            ignore (Directory.CreateDirectory(packagePath))
+            installPackageToPath packages packagePath package            
 
         let packages = Download.run { downloadPackages Map.empty repositoryUri with Log = log }
         let installOrder = this.PackageNames
                            |> List.ofSeq
-                           |> List.collect (buildGraph packages)
+                           |> List.collect (buildGraphByName packages)
 
         if preview then
             printfn "The following packages would be installed:\n"
@@ -141,7 +154,7 @@ type InstallCommand() =
             0
         else
             { (installOrder
-               |> List.map installPackage
+               |> List.map (installPackage packages)
                |> Download.batch) with Log = log }
             |> Download.run
             |> List.max

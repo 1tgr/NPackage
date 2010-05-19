@@ -6,15 +6,14 @@
   "Maintainer": "tim.g.robinson@gmail.com",
   "MasterSites": [ "http://build.partario.com/guestAuth/" ],
   "Requires": [ "fsharp.core", "sharpziplib", "mono.options" ],
-  "Executables": {
+  "CopyLocal": true,
+  "Libraries": {
     "NPackage.exe": {
       "Binary": "downloadArtifacts.html?buildTypeId=bt2&buildId=lastSuccessful#NPackage.exe"
     },
     "NPackage.pdb": {
       "Binary": "downloadArtifacts.html?buildTypeId=bt2&buildId=lastSuccessful#NPackage.pdb"
     },
-  },
-  "Libraries": {
     "NPackage.Core.dll": {
       "Binary": "downloadArtifacts.html?buildTypeId=bt2&buildId=lastSuccessful#NPackage.Core.dll"
     },
