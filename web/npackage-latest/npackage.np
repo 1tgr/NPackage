@@ -5,11 +5,14 @@
   "Author": "Tim Robinson",
   "Maintainer": "tim.g.robinson@gmail.com",
   "MasterSites": [ "http://build.partario.com/guestAuth/" ],
-  "Requires": [ "fsharp.core", "sharpziplib", "mono.options" ],
+  "Requires": [ "fsharp.core", "sharpziplib", "mono.options", "json" ],
   "CopyLocal": true,
   "Libraries": {
     "NPackage.exe": {
       "Binary": "downloadArtifacts.html?buildTypeId=bt2&buildId=lastSuccessful#NPackage.exe"
+    },
+    "NPackage.exe.config": {
+      "Binary": "downloadArtifacts.html?buildTypeId=bt2&buildId=lastSuccessful#NPackage.exe.config"
     },
     "NPackage.pdb": {
       "Binary": "downloadArtifacts.html?buildTypeId=bt2&buildId=lastSuccessful#NPackage.pdb"
