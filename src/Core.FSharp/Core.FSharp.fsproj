@@ -36,8 +36,11 @@
   <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="!Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <ItemGroup>
+    <Compile Include="StreamExtensions.fs" />
+    <Compile Include="Archive.fs" />
     <Compile Include="UriKey.fs" />
     <Compile Include="MapExtensions.fs" />
+    <Compile Include="DownloadWorkflow.fs" />
     <Compile Include="Download.fs" />
     <Compile Include="Library.fs" />
     <Compile Include="Package.fs" />
@@ -48,6 +51,9 @@
     <Compile Include="HelpCommand.fs" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="ICSharpCode.SharpZipLib">
+      <HintPath>..\..\lib\sharpziplib\0.85.5\ICSharpCode.SharpZipLib.dll</HintPath>
+    </Reference>
     <Reference Include="Mono.Options">
       <HintPath>..\..\lib\mono.options\0.2.1\Mono.Options.dll</HintPath>
     </Reference>
@@ -61,11 +67,6 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
-    <ProjectReference Include="..\Core\Core.csproj">
-      <Name>Core</Name>
-      <Project>{6ba63584-7678-4c8e-91d5-ae36ad992adb}</Project>
-      <Private>True</Private>
-    </ProjectReference>
   </ItemGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
 	     Other similar extension points exist, see Microsoft.Common.targets.

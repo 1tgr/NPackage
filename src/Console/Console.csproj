@@ -74,10 +74,6 @@
       <Project>{56B1EEC3-BE0D-488F-AD38-5E9FDD7F3876}</Project>
       <Name>Core.FSharp</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Core\Core.csproj">
-      <Project>{6BA63584-7678-4C8E-91D5-AE36AD992ADB}</Project>
-      <Name>Core</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">

@@ -8,12 +8,11 @@ type Download<'a> = { Uris : Map<UriKey, List<Ref<Option<String>>>>;
 
 module Download =
     let run { Uris = m; Log = log; Action = f } =
-        let workflow = new DownloadWorkflow()
-        use subscription = workflow.Log.Subscribe(fun (e : LogEventArgs) -> log e.Message)
-        Map.iter (fun { Uri = uri; Filename = filename } -> 
+        let workflow = new DownloadWorkflow(log)
+        Map.iter (fun key -> 
             List.iter (fun ref -> 
                 match !ref with
-                | None -> workflow.Enqueue(uri, filename, fun s -> ref := Some s)
+                | None -> workflow.Enqueue(key, fun s -> ref := Some s)
                 | Some _ -> ())) m
 
         while workflow.Step() do

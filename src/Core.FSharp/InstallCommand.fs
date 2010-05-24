@@ -110,7 +110,7 @@ type InstallCommand() =
 
                     if (not libraryFileInfo.Exists) || (archiveFileInfo.LastWriteTime > libraryFileInfo.LastWriteTime) then
                         log ("Unpacking " + archiveFilename + "#" + fragment)
-                        DownloadWorkflow.ExtractFile(archiveFilename, fragment, libraryFilename)
+                        Archive.extract archiveFilename fragment libraryFilename
                         success libraryFilename
                 else
                     do! Download.fetch_ uri libraryFilename
