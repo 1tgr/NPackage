@@ -5,7 +5,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Console", "Console\Console.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTests", "UnitTests\UnitTests.csproj", "{D3FE7F75-1629-45E8-8CA4-B10B54FA80C6}"
 EndProject
-Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Core.FSharp", "Core.FSharp\Core.FSharp.fsproj", "{56B1EEC3-BE0D-488F-AD38-5E9FDD7F3876}"
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Core", "Core\Core.fsproj", "{56B1EEC3-BE0D-488F-AD38-5E9FDD7F3876}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

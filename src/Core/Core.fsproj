@@ -8,9 +8,9 @@
     <ProjectGuid>{56b1eec3-be0d-488f-ad38-5e9fdd7f3876}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>Core.FSharp</RootNamespace>
-    <AssemblyName>NPackage.Core.FSharp</AssemblyName>
+    <AssemblyName>NPackage.Core</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
-    <Name>Core.FSharp</Name>
+    <Name>Core</Name>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
