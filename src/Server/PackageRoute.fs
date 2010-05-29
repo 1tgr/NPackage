@@ -1,5 +1,3 @@
 ﻿namespace NPackage.Server
 
-type PackageRoute = { Action : string; Id : string }
-
-
+type PackageRoute = { PackageName : string; Action : string }
