@@ -7,9 +7,9 @@ open Microsoft.FSharp.Reflection
 module Application =
     let registerRoutes (routes : RouteCollection) =
         routes.Add(
-            new Route("{Action}/{Id}", 
+            new Route("{PackageName}/{Action}", 
                 CustomRouteHandler.create (fun route -> new PackageHandler(route)), 
-                Defaults = new RouteValueDictionary({ Action = "index"; Id = "" })))
+                Defaults = new RouteValueDictionary({ PackageName = ""; Action = "get" })))
 
 type ApplicationType() =
     inherit HttpApplication()

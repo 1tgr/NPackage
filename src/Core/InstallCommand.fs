@@ -41,49 +41,6 @@ type InstallCommand() =
 
         let archiveDirectory = archivePath + Path.DirectorySeparatorChar.ToString()
 
-        let downloadPackage uri = Download.workflow {
-            let! packageFilename = Download.fetch uri archiveDirectory
-            use textReader = new StreamReader(packageFilename)
-            use jsonReader = new JsonTextReader(textReader)
-            let package = serializer.Deserialize<Package>(jsonReader)
-
-            if package.MasterSites.Count = 0 then
-                package.MasterSites.Add(uri.GetLeftPart(UriPartial.Path))
-
-            return package
-        }
-
-        let registerPackage packages (package : Package) =
-            packages
-            |> Map.add package.Name package
-            |> Map.add (package.Name + "-" + package.Version) package
-
-        let rec downloadPackages packages uri = Download.workflow {
-            let! repositoryFilename = Download.fetch uri archiveDirectory
-            use textReader = new StreamReader(repositoryFilename)
-            use jsonReader = new JsonTextReader(textReader)
-            let repository = serializer.Deserialize<Repository>(jsonReader)
-
-            for package in repository.Packages do
-                if package.MasterSites.Count = 0 then
-                    package.MasterSites.Add(uri.GetLeftPart(UriPartial.Path))
-
-            let! repositoryImports = repository.RepositoryImports
-                                     |> List.ofSeq
-                                     |> List.map (fun relativeUri -> downloadPackages packages (new Uri(uri, relativeUri)))
-                                     |> Download.batch
-
-            let! packageImports = repository.PackageImports
-                                  |> List.ofSeq
-                                  |> List.map (fun relativeUri -> downloadPackage (new Uri(uri, relativeUri)))
-                                  |> Download.batch
-
-            let packages' = List.fold (MapExtensions.appendWith (fun _ value -> value)) packages repositoryImports
-            return packageImports
-                    |> List.append (List.ofSeq repository.Packages)
-                    |> List.fold registerPackage packages'
-        }
-
         let rec buildGraphByName packages name =
             match Map.tryFind name packages with
             | Some (package : Package) -> buildGraph packages package
@@ -142,7 +99,7 @@ type InstallCommand() =
             ignore (Directory.CreateDirectory(packagePath))
             installPackageToPath packages packagePath package            
 
-        let packages = Download.run { downloadPackages Map.empty repositoryUri with Log = log }
+        let packages = Download.run { PackageGraph.download Map.empty archiveDirectory repositoryUri with Log = log }
         let installOrder = this.PackageNames
                            |> List.ofSeq
                            |> List.collect (buildGraphByName packages)
