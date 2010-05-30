@@ -15,7 +15,7 @@ type PackageHandler(route) =
 
     interface IHttpHandler with
         member this.ProcessRequest context =
-            let repositoryFilename = context.Request.MapPath("~/packages.js")
+            let repositoryFilename = "/var/www/np/packages.js"
             let packages = new Uri(repositoryFilename)
                            |> PackageGraph.download Map.empty archiveDirectory
                            |> Download.run
