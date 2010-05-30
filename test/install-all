@@ -4,7 +4,7 @@ testDir=`dirname $0`
 cd $testDir
 rm -r bin/
 mkdir -p bin
-curl "http://build.partario.com/guestAuth/downloadArtifacts.html?buildTypeId=bt2&buildId=lastSuccessful" > bin/NPackage.zip
+curl "http://build.partario.com/guestAuth/repository/download/bt2/.lastSuccessful/NPackage.zip" > bin/NPackage.zip
 unzip bin/NPackage.zip -d bin/
 rm -r lib/.dist lib/*
 exec mono bin/NPackage.exe install \

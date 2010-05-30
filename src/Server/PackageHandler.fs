@@ -16,7 +16,7 @@ type PackageHandler(route) =
         member this.ProcessRequest context =
             match route with
             | { Action = "get"; PackageName = packageName } ->
-                let repositoryFilename = context.Request.MapPath("~/packages.js")
+                let repositoryFilename = "/var/www/np/packages.js"
                 let packages = new Uri(repositoryFilename)
                                |> PackageGraph.download Map.empty archiveDirectory
                                |> Download.run

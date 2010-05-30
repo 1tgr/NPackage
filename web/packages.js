@@ -110,36 +110,36 @@
   "Description": "Packaging and distribution system for .NET",
   "Author": "Tim Robinson",
   "Maintainer": "tim.g.robinson@gmail.com",
-  "MasterSites": [ "http://build.partario.com/guestAuth/" ],
+  "MasterSites": [ "http://build.partario.com/guestAuth/repository/download/bt2/.lastSuccessful/" ],
   "Requires": [ "fsharp.core", "sharpziplib", "mono.options", "json" ],
   "CopyLocal": true,
   "Libraries": {
     "NPackage.exe": {
-      "Binary": "downloadArtifacts.html?buildTypeId=bt2&buildId=lastSuccessful#NPackage.exe"
+      "Binary": "NPackage.zip#NPackage.exe"
     },
     "NPackage.exe.config": {
-      "Binary": "downloadArtifacts.html?buildTypeId=bt2&buildId=lastSuccessful#NPackage.exe.config"
+      "Binary": "NPackage.zip#NPackage.exe.config"
     },
     "NPackage.pdb": {
-      "Binary": "downloadArtifacts.html?buildTypeId=bt2&buildId=lastSuccessful#NPackage.pdb"
+      "Binary": "NPackage.zip#NPackage.pdb"
     },
     "NPackage.Core.dll": {
-      "Binary": "downloadArtifacts.html?buildTypeId=bt2&buildId=lastSuccessful#NPackage.Core.dll"
+      "Binary": "NPackage.zip#NPackage.Core.dll"
     },
     "NPackage.Core.pdb": {
-      "Binary": "downloadArtifacts.html?buildTypeId=bt2&buildId=lastSuccessful#NPackage.Core.pdb"
+      "Binary": "NPackage.zip#NPackage.Core.pdb"
     },
     "NPackage.Core.FSharp.dll": {
-      "Binary": "downloadArtifacts.html?buildTypeId=bt2&buildId=lastSuccessful#NPackage.Core.FSharp.dll"
+      "Binary": "NPackage.zip#NPackage.Core.FSharp.dll"
     },
     "NPackage.Core.FSharp.pdb": {
-      "Binary": "downloadArtifacts.html?buildTypeId=bt2&buildId=lastSuccessful#NPackage.Core.FSharp.pdb"
+      "Binary": "NPackage.zip#NPackage.Core.FSharp.pdb"
     },
     "NPackage.Core.dll": {
-      "Binary": "downloadArtifacts.html?buildTypeId=bt2&buildId=lastSuccessful#NPackage.Core.dll"
+      "Binary": "NPackage.zip#NPackage.Core.dll"
     },
     "NPackage.Core.pdb": {
-      "Binary": "downloadArtifacts.html?buildTypeId=bt2&buildId=lastSuccessful#NPackage.Core.pdb"
+      "Binary": "NPackage.zip#NPackage.Core.pdb"
     },
   }
 }
