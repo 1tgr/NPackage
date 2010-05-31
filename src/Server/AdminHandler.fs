@@ -54,8 +54,13 @@ type AdminHandler(route : AdminRoute) =
 
                     match Environment.GetEnvironmentVariable("SHELL") with
                     | shell when not (String.IsNullOrEmpty(shell)) ->
-                        use p = Process.Start(shell, String.Format(@"-c ""'{0}' '{1}' '{2}'", context.Request.MapPath("~/after-submit"), package.Name, package.Version))
+                        use p = Process.Start(shell, String.Format(@"-c ""'{0}' '{1}' '{2}'""", context.Request.MapPath("~/after-submit"), package.Name, package.Version))
                         p.WaitForExit()
+                        match p.ExitCode with
+                        | n when n <> 0 ->
+                            raise (new InvalidOperationException(String.Format("Command {0} {1} returned exit code {2}.", p.StartInfo.FileName, p.StartInfo.Arguments, p.ExitCode)))
+                        | _ -> ()
+
                     | _ -> ()
 
                 | _ -> raise (new InvalidOperationException("Expected a form field called 'json'."))
