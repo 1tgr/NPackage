@@ -106,7 +106,7 @@
 },
 {
   "Name": "npackage",
-  "Version": "latest",
+  "Version": "daily",
   "Description": "Packaging and distribution system for .NET",
   "Author": "Tim Robinson",
   "Maintainer": "tim.g.robinson@gmail.com",
