@@ -38,7 +38,12 @@ type DownloadWorkflow(log) =
 
         let request = WebRequest.Create(uri)
         match request with
-        | :? HttpWebRequest as httpWebRequest -> httpWebRequest.UseDefaultCredentials <- true
+        | :? HttpWebRequest as httpWebRequest -> 
+            try
+                httpWebRequest.UseDefaultCredentials <- true
+            with :? NotImplementedException ->
+                ()
+
         | _ -> ()
 
         use response = request.GetResponse()
