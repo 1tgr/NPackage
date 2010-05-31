@@ -46,11 +46,11 @@ type AdminHandler(route : AdminRoute) =
 
                     removeDuplicates package repository.Packages
                     repository.Packages.Add(package)
-                    use streamWriter = File.CreateText(repositoryFilename)
-                    use jsonWriter = new JsonTextWriter(streamWriter)
-                    jsonWriter.Formatting <- Formatting.Indented
-                    serializer.Serialize(jsonWriter, repository)
-                    serializer.Serialize(outputWriter, package)
+
+                    using (File.CreateText(repositoryFilename))
+                          (fun streamWriter -> use jsonWriter = new JsonTextWriter(streamWriter)
+                                               jsonWriter.Formatting <- Formatting.Indented
+                                               serializer.Serialize(jsonWriter, repository))
 
                     let shell = match Environment.GetEnvironmentVariable("SHELL") with
                                 | shell when not (String.IsNullOrEmpty(shell)) -> shell
@@ -62,6 +62,8 @@ type AdminHandler(route : AdminRoute) =
                     | n when n <> 0 ->
                         raise (new InvalidOperationException(String.Format("Command {0} {1} returned exit code {2}.", p.StartInfo.FileName, p.StartInfo.Arguments, p.ExitCode)))
                     | _ -> ()
+
+                    serializer.Serialize(outputWriter, package)
 
                 | _ -> raise (new InvalidOperationException("Expected a form field called 'json'."))
 
