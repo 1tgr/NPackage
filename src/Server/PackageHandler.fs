@@ -14,28 +14,42 @@ type PackageHandler(route) =
 
     interface IHttpHandler with
         member this.ProcessRequest context =
-            let repositoryFilename = "/var/www/np/packages.js"
+            let repositoryFilename = context.Request.MapPath("~/packages.js")
             let packages = new Uri(repositoryFilename)
-                            |> PackageGraph.download Map.empty archiveDirectory
+                            |> PackageGraph.download archiveDirectory
                             |> Download.run
 
+            use writer = new JsonTextWriter(context.Response.Output)
+            writer.Formatting <- Formatting.Indented
+                
             match route with
             | { Action = "get"; PackageName = packageName } ->
                 match Map.tryFind packageName packages with
-                | Some package ->
+                | Some { Metadata = { Package = package; LastModified = lastModified } } ->
                     context.Response.ContentType <- "application/json"
-                    serializer.Serialize(context.Response.Output, package)
+                    context.Response.Cache.SetLastModified(lastModified)
+                    serializer.Serialize(writer, package)
 
                 | None -> context.Response.StatusCode <- 404
 
             | { Action = "list" } ->
-                let array = packages 
-                            |> Map.toSeq
-                            |> Seq.map snd
-                            |> Array.ofSeq
+                let packageList = packages 
+                                  |> Map.toList
+                                  |> List.filter (function
+                                                  | (_, { IsAlias = false }) -> true
+                                                  | (_, { IsAlias = true }) -> false)
+
+                let lastModified = packageList
+                                   |> List.map (fun (_, { Metadata = { LastModified = lastModified }}) -> lastModified)
+                                   |> List.max
+
+                let repository = new Repository()
+                for (_, { Metadata = { Package = package }}) in packageList do
+                    repository.Packages.Add(package)
 
                 context.Response.ContentType <- "application/json"
-                serializer.Serialize(context.Response.Output, array)
+                context.Response.Cache.SetLastModified(lastModified)
+                serializer.Serialize(writer, repository)
 
             | _ -> context.Response.StatusCode <- 404
 

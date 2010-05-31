@@ -43,8 +43,9 @@ type InstallCommand() =
 
         let rec buildGraphByName packages name =
             match Map.tryFind name packages with
-            | Some (package : Package) -> buildGraph packages package
+            | Some { Metadata = { Package = package } } -> buildGraph packages package
             | None -> raise (new InvalidOperationException("There is no package called " + name + "."))
+
         and buildGraph packages package =
             let dependentOrder = package.Requires
                                  |> List.ofSeq
@@ -99,7 +100,7 @@ type InstallCommand() =
             ignore (Directory.CreateDirectory(packagePath))
             installPackageToPath packages packagePath package            
 
-        let packages = Download.run { PackageGraph.download Map.empty archiveDirectory repositoryUri with Log = log }
+        let packages = Download.run { PackageGraph.download archiveDirectory repositoryUri with Log = log }
         let installOrder = this.PackageNames
                            |> List.ofSeq
                            |> List.collect (buildGraphByName packages)
