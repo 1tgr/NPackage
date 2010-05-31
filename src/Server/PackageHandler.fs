@@ -14,13 +14,13 @@ type PackageHandler(route) =
 
     interface IHttpHandler with
         member this.ProcessRequest context =
+            let repositoryFilename = "/var/www/np/packages.js"
+            let packages = new Uri(repositoryFilename)
+                            |> PackageGraph.download Map.empty archiveDirectory
+                            |> Download.run
+
             match route with
             | { Action = "get"; PackageName = packageName } ->
-                let repositoryFilename = "/var/www/np/packages.js"
-                let packages = new Uri(repositoryFilename)
-                               |> PackageGraph.download Map.empty archiveDirectory
-                               |> Download.run
-
                 match Map.tryFind packageName packages with
                 | Some package ->
                     context.Response.ContentType <- "application/json"
@@ -29,8 +29,13 @@ type PackageHandler(route) =
                 | None -> context.Response.StatusCode <- 404
 
             | { Action = "list" } ->
+                let array = packages 
+                            |> Map.toSeq
+                            |> Seq.map snd
+                            |> Array.ofSeq
+
                 context.Response.ContentType <- "application/json"
-                context.Response.Write("hello")
+                serializer.Serialize(context.Response.Output, array)
 
             | _ -> context.Response.StatusCode <- 404
 
