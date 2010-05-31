@@ -45,6 +45,8 @@
     <Compile Include="Library.fs" />
     <Compile Include="Package.fs" />
     <Compile Include="Repository.fs" />
+    <Compile Include="PackageMetadata.fs" />
+    <Compile Include="PackageInfo.fs" />
     <Compile Include="PackageGraph.fs" />
     <Compile Include="ICommand.fs" />
     <Compile Include="CommandBase.fs" />

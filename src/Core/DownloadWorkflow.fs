@@ -22,7 +22,7 @@ type DownloadWorkflow(log) =
         if String.IsNullOrEmpty(contentDisposition) then
             None
         else
-            let parts = contentDisposition.Split([| ';' |], 2)
+            let parts = contentDisposition.Split([| ';' |])
             if parts.Length > 1 then
                 let part1 = parts.[1].TrimStart()
                 let prefix = "filename="
