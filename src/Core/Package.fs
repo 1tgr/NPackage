@@ -12,7 +12,7 @@ type Package() =
     let mutable copyLocal = false
     let masterSites = new ResizeArray<string>()
     let requires = new ResizeArray<string>()
-    let libraries = new Dictionary<string, Library>()
+    let libraries = new SortedDictionary<string, Library>(StringComparer.InvariantCultureIgnoreCase)
 
     member this.Name
         with get() = name
