@@ -2,6 +2,7 @@
 
 open System
 open System.Collections.Generic
+open System.Diagnostics
 open System.IO
 open System.Web
 open Newtonsoft.Json
@@ -50,6 +51,11 @@ type AdminHandler(route : AdminRoute) =
                     jsonWriter.Formatting <- Formatting.Indented
                     serializer.Serialize(jsonWriter, repository)
                     serializer.Serialize(outputWriter, package)
+
+                    try
+                        use p = Process.Start(context.Request.MapPath("~/after-submit"), String.Format(@"""{0}"" ""{1}""", package.Name, package.Version))
+                        p.WaitForExit()
+                    with _ -> ()
 
                 | _ -> raise (new InvalidOperationException("Expected a form field called 'json'."))
 
