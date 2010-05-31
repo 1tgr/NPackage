@@ -15,12 +15,13 @@ type PackageHandler(route) =
     interface IHttpHandler with
         member this.ProcessRequest context =
             let repositoryFilename = context.Request.MapPath("~/packages.js")
+            use l = RepositoryLock.acquireRead repositoryFilename
             let packages = new Uri(repositoryFilename)
                             |> PackageGraph.download archiveDirectory
                             |> Download.run
 
-            use writer = new JsonTextWriter(context.Response.Output)
-            writer.Formatting <- Formatting.Indented
+            use outputWriter = new JsonTextWriter(context.Response.Output)
+            outputWriter.Formatting <- Formatting.Indented
                 
             match route with
             | { Action = "get"; PackageName = packageName } ->
@@ -28,7 +29,7 @@ type PackageHandler(route) =
                 | Some { Metadata = { Package = package; LastModified = lastModified } } ->
                     context.Response.ContentType <- "application/json"
                     context.Response.Cache.SetLastModified(lastModified)
-                    serializer.Serialize(writer, package)
+                    serializer.Serialize(outputWriter, package)
 
                 | None -> context.Response.StatusCode <- 404
 
@@ -49,7 +50,7 @@ type PackageHandler(route) =
 
                 context.Response.ContentType <- "application/json"
                 context.Response.Cache.SetLastModified(lastModified)
-                serializer.Serialize(writer, repository)
+                serializer.Serialize(outputWriter, repository)
 
             | _ -> context.Response.StatusCode <- 404
 

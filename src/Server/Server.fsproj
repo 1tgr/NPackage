@@ -36,7 +36,10 @@
   <Import Project="$(MSBuildExtensionsPath32)\FSharp\1.0\Microsoft.FSharp.Targets" Condition="!Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <Import Project="$(MSBuildExtensionsPath32)\..\Microsoft F#\v4.0\Microsoft.FSharp.Targets" Condition=" Exists('$(MSBuildBinPath)\Microsoft.Build.Tasks.v4.0.dll')" />
   <ItemGroup>
+    <Compile Include="RepositoryLock.fs" />
     <Compile Include="CustomRouteHandler.fs" />
+    <Compile Include="AdminRoute.fs" />
+    <Compile Include="AdminHandler.fs" />
     <Compile Include="PackageRoute.fs" />
     <Compile Include="PackageHandler.fs" />
     <Compile Include="Application.fs" />

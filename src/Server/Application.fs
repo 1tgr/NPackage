@@ -5,13 +5,14 @@ open System.Web.Routing
 open Microsoft.FSharp.Reflection
 
 module Application =
-    let addRoute<'Route, 'Handler when 'Handler :> IHttpHandler> url (defaults : 'Route) (makeHandler : 'Route -> 'Handler) (routes : RouteCollection) =
+    let addRoute<'Route, 'Handler when 'Handler :> IHttpHandler> url (makeHandler : 'Route -> 'Handler) (defaults : 'Route) (routes : RouteCollection) =
         routes.Add(new Route(url, new RouteValueDictionary(defaults), CustomRouteHandler.create makeHandler))
         routes
 
     let registerRoutes =
-        addRoute "packages" { PackageName = ""; Action = "list" } (fun route -> new PackageHandler(route)) >>
-        addRoute "packages/{PackageName}/{Action}" { PackageName = ""; Action = "get" } (fun route -> new PackageHandler(route))
+        addRoute "admin/{Action}"                   (fun route -> new AdminHandler(route))   { Action = "" } >>
+        addRoute "packages"                         (fun route -> new PackageHandler(route)) { PackageName = ""; Action = "list" } >>
+        addRoute "packages/{PackageName}/{Action}"  (fun route -> new PackageHandler(route)) { PackageName = ""; Action = "get" }
 
 type ApplicationType() =
     inherit HttpApplication()
