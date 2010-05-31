@@ -52,10 +52,11 @@ type AdminHandler(route : AdminRoute) =
                     serializer.Serialize(jsonWriter, repository)
                     serializer.Serialize(outputWriter, package)
 
-                    try
-                        use p = Process.Start(context.Request.MapPath("~/after-submit"), String.Format(@"""{0}"" ""{1}""", package.Name, package.Version))
+                    match Environment.GetEnvironmentVariable("SHELL") with
+                    | shell when not (String.IsNullOrEmpty(shell)) ->
+                        use p = Process.Start(shell, String.Format(@"-c ""'{0}' '{1}' '{2}'", context.Request.MapPath("~/after-submit"), package.Name, package.Version))
                         p.WaitForExit()
-                    with _ -> ()
+                    | _ -> ()
 
                 | _ -> raise (new InvalidOperationException("Expected a form field called 'json'."))
 
