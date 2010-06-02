@@ -16,7 +16,7 @@ type DownloadWorkflow(log) =
     let sanitise (s : String) =
         let invalidPathChars = 
             Path.InvalidPathChars
-            |> Seq.append [| Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar, ':' |]
+            |> Seq.append [| Path.DirectorySeparatorChar; Path.AltDirectorySeparatorChar; ':' |]
             |> Array.ofSeq
 
         let rec sanitise' (sb : StringBuilder) =
