@@ -5,6 +5,7 @@ open System.Collections.Generic
 open System.IO
 open System.Linq
 open System.Net
+open System.Text
 
 type DownloadAction = { Key : UriKey;
                         Continuation : string -> unit }
@@ -12,9 +13,29 @@ type DownloadAction = { Key : UriKey;
 type DownloadWorkflow(log) =
     let actions = new ResizeArray<DownloadAction>()
 
-    let addFilename (pathOrFilename : string) filename =
+    let sanitise (s : String) =
+        let rec sanitise' (sb : StringBuilder) =
+            match sb.ToString().IndexOfAny(Path.InvalidPathChars) with
+            | n when n < 0 -> sb
+            | n ->
+                sb.[n] <- '-'
+                sanitise' sb
+
+        (sanitise' (new StringBuilder(s))).ToString()
+
+    let ensureFilename (pathOrFilename : string) (uri : Uri) filename =
         match pathOrFilename.EndsWith(Path.DirectorySeparatorChar.ToString()) || pathOrFilename.EndsWith(Path.AltDirectorySeparatorChar.ToString()) with
-        | true -> Path.Combine(pathOrFilename, filename)
+        | true -> 
+            let dir1 =
+                let authority = uri.GetLeftPart(UriPartial.Authority)
+                if authority = String.Format("{0}://{1}", Uri.UriSchemeHttp, uri.Host) then
+                    uri.Host
+                else
+                    authority
+
+            let dir2 = uri.PathAndQuery.TrimStart('/')
+            let dir = Path.Combine(pathOrFilename, Path.Combine(sanitise dir1, sanitise dir2))
+            Path.Combine(dir, filename)
         | false -> pathOrFilename
 
     let attachmentFilename (response : WebResponse) =
@@ -49,27 +70,29 @@ type DownloadWorkflow(log) =
         use response = request.GetResponse()
         let responseUriFilename =
             match attachmentFilename response with
-            | Some filename -> filename
+            | Some s -> s
             | None -> Path.GetFileName(response.ResponseUri.GetComponents(UriComponents.Path, UriFormat.Unescaped))
                           
-        let responseFilename = addFilename filename responseUriFilename
+        let responseFilename = ensureFilename filename uri responseUriFilename
         let fileInfo = new FileInfo(responseFilename)
 
-        let httpWebResponse = 
+        let lastModified =
             match response with
-            | :? HttpWebResponse as r -> r
-            | _ -> null
+            | :? HttpWebResponse as httpWebResponse -> httpWebResponse.LastModified
+            | :? FileWebResponse as fileWebResponse -> File.GetLastWriteTimeUtc(fileWebResponse.ResponseUri.LocalPath)
+            | _ -> DateTime.UtcNow
 
-        if (not fileInfo.Exists) || (httpWebResponse <> null && httpWebResponse.LastModified > fileInfo.LastWriteTime) then
+        if (not fileInfo.Exists) || (lastModified > fileInfo.LastWriteTimeUtc) then
             log (String.Format("Downloading from {0} to {1}", response.ResponseUri, responseFilename))
             using (response.GetResponseStream()) (fun inputStream ->
-                using (File.Create(responseFilename)) (StreamExtensions.copy inputStream))
+                let dir = Path.GetDirectoryName(responseFilename)
+                ignore (Directory.CreateDirectory(dir))
+                use outputStream = File.Create(responseFilename)
+                StreamExtensions.copy inputStream outputStream)
 
             fileInfo.Refresh()
+            fileInfo.LastWriteTimeUtc <- lastModified
 
-            if httpWebResponse <> null then
-                fileInfo.LastWriteTime <- httpWebResponse.LastModified
-                            
         for action in actions do
             action.Continuation responseFilename
 
@@ -99,14 +122,17 @@ type DownloadWorkflow(log) =
             | [(filename, actions)] -> ignore (downloadFirst uri filename actions)
             | (filename, actions) :: rest ->
                 let (firstFilename, firstFileInfo, responseUriFilename) = downloadFirst uri filename actions
+                let firstWriteTime = firstFileInfo.LastWriteTimeUtc
                 for (filename, actions) in rest do
-                    let responseFilename = addFilename filename responseUriFilename
+                    let responseFilename = ensureFilename filename uri responseUriFilename
                     let fileInfo = new FileInfo(responseFilename)
 
-                    if (not fileInfo.Exists) || firstFileInfo.LastWriteTime > fileInfo.LastWriteTime then
+                    if (not fileInfo.Exists) || firstWriteTime > fileInfo.LastWriteTimeUtc then
                         log (String.Format("Copying from {0} to {1}", firstFilename, responseFilename))
+                        let dir = Path.GetDirectoryName(responseFilename)
+                        ignore (Directory.CreateDirectory(dir))
                         File.Copy(firstFilename, responseFilename, true)
-                        fileInfo.LastWriteTime <- firstFileInfo.LastWriteTime
+                        fileInfo.LastWriteTimeUtc <- firstWriteTime
 
                     for action in actions do
                         action.Continuation responseFilename

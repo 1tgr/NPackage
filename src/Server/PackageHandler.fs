@@ -10,7 +10,6 @@ type PackageHandler(route) =
     let serializer = new JsonSerializer()
     let archivePath = Path.Combine(Path.GetTempPath(), "NPackage")
     let archiveDirectory = archivePath + Path.DirectorySeparatorChar.ToString()
-    do ignore (Directory.CreateDirectory(archivePath))
 
     interface IHttpHandler with
         member this.ProcessRequest context =

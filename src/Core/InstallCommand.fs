@@ -37,8 +37,6 @@ type InstallCommand() =
             findLibDirectory "lib"
 
         let archivePath = Path.Combine(libPath, ".dist")
-        ignore (Directory.CreateDirectory(archivePath))
-
         let archiveDirectory = archivePath + Path.DirectorySeparatorChar.ToString()
 
         let rec buildGraphByName packages name =
@@ -97,7 +95,6 @@ type InstallCommand() =
 
         let installPackage packages (package : Package) =
             let packagePath = Path.Combine(Path.Combine(libPath, package.Name), package.Version)
-            ignore (Directory.CreateDirectory(packagePath))
             installPackageToPath packages packagePath package            
 
         let packages = Download.run { PackageGraph.download archiveDirectory repositoryUri with Log = log }
