@@ -14,8 +14,13 @@ type DownloadWorkflow(log) =
     let actions = new ResizeArray<DownloadAction>()
 
     let sanitise (s : String) =
+        let invalidPathChars = 
+            Path.InvalidPathChars
+            |> Seq.append [| Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar, ':' |]
+            |> Array.ofSeq
+
         let rec sanitise' (sb : StringBuilder) =
-            match sb.ToString().IndexOfAny(Path.InvalidPathChars) with
+            match sb.ToString().IndexOfAny(invalidPathChars) with
             | n when n < 0 -> sb
             | n ->
                 sb.[n] <- '-'
@@ -33,9 +38,8 @@ type DownloadWorkflow(log) =
                 else
                     authority
 
-            let dir2 = uri.PathAndQuery.TrimStart('/')
-            let dir = Path.Combine(pathOrFilename, Path.Combine(sanitise dir1, sanitise dir2))
-            Path.Combine(dir, filename)
+            let dir2 = Path.GetDirectoryName(uri.PathAndQuery.TrimStart('/'))
+            Path.Combine(pathOrFilename, Path.Combine(sanitise dir1, Path.Combine(sanitise dir2, filename)))
         | false -> pathOrFilename
 
     let attachmentFilename (response : WebResponse) =
