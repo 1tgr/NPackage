@@ -20,7 +20,7 @@ let private registerPackage packages ({ Package = package } as metadata) =
     else
         packages
 
-let private relativeTo (uri : Uri) (relativeUri : Uri) =
+let private relativeTo (uri : Uri) (relativeUri : string) =
     new Uri(uri, relativeUri)
 
 let download archiveDirectory = 

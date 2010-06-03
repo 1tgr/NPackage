@@ -25,6 +25,8 @@ let extract (archiveFilename : string) entryName filename =
         match file.FindEntry(entryName, true) with
         | index when index >= 0 ->
             use inputStream = file.GetInputStream(int64 index)
+            let dir = Path.GetDirectoryName(filename)
+            ignore (Directory.CreateDirectory(dir))
             use outputStream = File.Create(filename)
             StreamExtensions.copy inputStream outputStream
 
@@ -37,6 +39,8 @@ let extract (archiveFilename : string) entryName filename =
         use tarStream = new TarInputStream(gzipStream)
         match findTarEntry tarStream entryName with
         | Some entry ->
+            let dir = Path.GetDirectoryName(filename)
+            ignore (Directory.CreateDirectory(dir))
             use outputStream = File.Create(filename)
             tarStream.CopyEntryContents(outputStream)
 
