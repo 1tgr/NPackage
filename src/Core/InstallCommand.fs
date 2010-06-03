@@ -69,8 +69,8 @@ type InstallCommand() =
                         Archive.extract archiveFilename fragment libraryFilename
                         success libraryFilename
                 else
-                    do! Download.fetch_ uri libraryFilename
-                    success libraryFilename
+                    let! libraryFilename' = Download.fetch uri libraryFilename
+                    success libraryFilename'
 
                 return 0
             }
